@@ -1,6 +1,2 @@
 function mulberry32(seed){let t=Math.floor(seed*0xffffffff);return()=>{t+=0x6D2B79F5;let r=Math.imul(t^t>>>15,1|t);r^=r+Math.imul(r^r>>>7,61|r);return((r^r>>>14)>>>0)/4294967296}}
-export function generateHouse({x,y,level=1,seed=.42}){
-  const rand=mulberry32(seed), w=.72+rand()*.18, d=.72+rand()*.18;
-  const h=34+level*5+rand()*9;
-  return {x,y,w,d,h,roof:8,wall:'brick',windows:Math.floor(2+rand()*3),cooler:true,tank:rand()>.35};
-}
+export function generateHouse({x,y,level=1,seed=.42}={}){const rand=mulberry32(seed),w=.72+rand()*.18,d=.72+rand()*.18,h=34+level*5+rand()*9;return{x,y,level,seed,w,d,h,roof:8,wall:rand()>.45?'brick':'stucco',windows:Math.floor(2+rand()*3),cooler:true,tank:rand()>.35,balcony:rand()>.55};}
