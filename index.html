@@ -4,7 +4,34 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>City Clicker — Persian</title>
-  <link rel="stylesheet" href="/src/style.css">
+  <link rel="stylesheet" href="./src/style.css">
+  <style>
+    #runtime-error {
+      position: fixed;
+      inset: 16px;
+      z-index: 9999;
+      overflow: auto;
+      padding: 20px;
+      border: 2px solid #a33;
+      border-radius: 12px;
+      background: #fff5f5;
+      color: #2b1515;
+      font: 14px/1.7 Consolas, "Cascadia Code", monospace;
+      direction: ltr;
+      text-align: left;
+      white-space: pre-wrap;
+      box-shadow: 0 12px 40px #0003;
+    }
+    #runtime-error h2 {
+      margin: 0 0 12px;
+      font: 700 20px/1.3 Tahoma, Arial, sans-serif;
+      color: #8b1e1e;
+    }
+    #runtime-error .meta {
+      margin-top: 12px;
+      color: #6b5555;
+    }
+  </style>
 </head>
 <body>
   <main id="app">
@@ -26,6 +53,47 @@
     </section>
     <canvas id="city"></canvas>
   </main>
-  <script type="module" src="/src/main.js"></script>
+
+  <script>
+    (function () {
+      function showError(error, kind) {
+        var box = document.getElementById("runtime-error");
+        if (!box) {
+          box = document.createElement("div");
+          box.id = "runtime-error";
+          document.body.appendChild(box);
+        }
+
+        var message = error && error.message ? error.message : String(error);
+        var stack = error && error.stack ? "\n\n" + error.stack : "";
+
+        box.innerHTML =
+          "<h2>City Clicker — JavaScript Error</h2>" +
+          "<div><strong>" + kind + "</strong></div>" +
+          "<div style=\"margin-top:8px\">" +
+          escapeHtml(message) +
+          "</div>" +
+          (stack ? "<div class=\"meta\">" + escapeHtml(stack) + "</div>" : "") +
+          "<div class=\"meta\">Open DevTools → Console for the same error.</div>";
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+
+      window.addEventListener("error", function (event) {
+        showError(event.error || event.message, "Uncaught error");
+      });
+
+      window.addEventListener("unhandledrejection", function (event) {
+        showError(event.reason, "Unhandled promise rejection");
+      });
+    })();
+  </script>
+
+  <script type="module" src="./src/main.js"></script>
 </body>
 </html>
