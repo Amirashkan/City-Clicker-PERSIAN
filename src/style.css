@@ -1,5 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap');
+
 :root{
-  font-family:Tahoma,Arial,sans-serif;
+  font-family:'Vazirmatn',Tahoma,Arial,sans-serif;
   color:#29251f;
   background:#e9e3d7;
   --safe-bottom:env(safe-area-inset-bottom,0px);
