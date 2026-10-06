@@ -4,6 +4,7 @@ import{calculateEconomy,evaluateBuilding,getLevelStats,getAgeStats}from'./core/R
 import{drawBuilding}from'./renderer/BuildingRenderer.js';
 import{drawGrid}from'./renderer/GridRenderer.js';
 import{drawAmbientLife}from'./renderer/AmbientLife.js';
+import{generateMapMask}from'./map/MapGenerator.js';
 
 const canvas=document.querySelector('#city'),ctx=canvas.getContext('2d');
 const moneyEl=document.querySelector('#money'),incomeEl=document.querySelector('#income'),clickEl=document.querySelector('#click-value');
@@ -49,6 +50,7 @@ applySettings();
 // ---------------------------------------------------------------------------
 
 const GRID=15;
+const mapMask=generateMapMask(GRID,GRID);
 const state={
   money:500,buildMode:false,selected:'house',hover:null,buildings:[],
   zoom:1,
@@ -72,13 +74,13 @@ function resize(){
   render();
 }
 function buildingAtTile(x,y){return state.buildings.find(b=>b.x===x&&b.y===y)||null}
-function validTile(x,y){return x>=0&&y>=0&&x<GRID&&y<GRID&&!buildingAtTile(x,y)}
+function validTile(x,y){return x>=0&&y>=0&&x<GRID&&y<GRID&&!!mapMask[y]?.[x]&&!buildingAtTile(x,y)}
 function refreshEconomy(){state.economy=calculateEconomy(state.buildings)}
 function render(){
   if(!iso)return;
   const r=canvas.getBoundingClientRect();
   ctx.clearRect(0,0,r.width,r.height);
-  drawGrid(ctx,iso,GRID,GRID,state.hover);if(state.effectRadiusVisible&&state.effectRadiusBuilding)drawEffectRadius(state.effectRadiusBuilding);
+  drawGrid(ctx,iso,GRID,GRID,state.hover,mapMask);if(state.effectRadiusVisible&&state.effectRadiusBuilding)drawEffectRadius(state.effectRadiusBuilding);
   drawAmbientLife(ctx,iso,performance.now(),state.buildings);
   [...state.buildings].sort((a,b)=>(a.x+a.y)-(b.x+b.y))
     .forEach(b=>drawBuilding(ctx,iso,b,state.hover?.x===b.x&&state.hover?.y===b.y));
@@ -161,7 +163,7 @@ function drawEffectRadius(b){
 const radius=getLevelStats(b.level||1).radius;
 ctx.save();
 for(let y=Math.max(0,b.y-radius);y<=Math.min(GRID-1,b.y+radius);y++)for(let x=Math.max(0,b.x-radius);x<=Math.min(GRID-1,b.x+radius);x++){
-if(Math.max(Math.abs(x-b.x),Math.abs(y-b.y))>radius)continue;
+if(Math.max(Math.abs(x-b.x),Math.abs(y-b.y))>radius||!mapMask[y]?.[x])continue;
 const p1=iso.worldToScreen(x,y),p2=iso.worldToScreen(x+1,y),p3=iso.worldToScreen(x+1,y+1),p4=iso.worldToScreen(x,y+1);
 ctx.beginPath();ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);ctx.lineTo(p3.x,p3.y);ctx.lineTo(p4.x,p4.y);ctx.closePath();ctx.fillStyle='rgba(82,118,91,.16)';ctx.strokeStyle='rgba(82,118,91,.42)';ctx.lineWidth=1;ctx.fill();ctx.stroke();
 }
