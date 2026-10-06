@@ -6,10 +6,23 @@ function candidates(buildings,types){
 }
 
 function buildRoute(from,to){
-  const ox=(Math.random()-.5)*.32, oy=(Math.random()-.5)*.32;
+  const dx=Math.abs(from.x-to.x),dy=Math.abs(from.y-to.y);
+  // When buildings touch or are directly adjacent, walk straight through the
+  // shared edge instead of making an artificial L-shaped detour.
+  if(dx<=1.01 && dy<=1.01){
+    const sharedX=Math.abs(from.x-to.x)<=1.01;
+    const ox=(Math.random()-.5)*.18,oy=(Math.random()-.5)*.18;
+    if(sharedX){
+      const y=(from.y+to.y)/2+oy;
+      return [{x:from.x,y},{x:to.x,y}];
+    }
+    const x=(from.x+to.x)/2+ox;
+    return [{x,y:from.y},{x,y:to.y}];
+  }
+
+  const ox=(Math.random()-.5)*.32,oy=(Math.random()-.5)*.32;
   const x1=from.x+ox,y1=from.y+oy,x2=to.x+ox,y2=to.y+oy;
-  const midX=x2,midY=y1;
-  return [{x:x1,y:y1},{x:midX,y:midY},{x:x2,y:y2}];
+  return [{x:x1,y:y1},{x:x2,y:y1},{x:x2,y:y2}];
 }
 
 function routeLength(route){
