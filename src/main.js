@@ -50,7 +50,22 @@ function render(){
 function choose(type){
   state.selected=type;state.buildMode=true;
   document.querySelectorAll('[data-building]').forEach(b=>b.classList.toggle('active',b.dataset.building===type));
+  showConstructionInfo(type);
   hint.textContent=BUILDINGS[type].name+' را روی یک خانه خالی بگذار.';
+}
+function showConstructionInfo(type){
+  const def=BUILDINGS[type];
+  const effects={
+    house:[['+1 درآمد پایه','good'],['+0.5 درآمد به ازای هر قدرت مغازه اطراف','good'],['+0.75 درآمد به ازای هر قدرت نانوایی اطراف','good'],['+0.5 درآمد به ازای هر قدرت پارک اطراف','good'],['-1 درآمد به ازای هر قدرت تولید مزاحم اطراف','bad']],
+    shop:[['+1 درآمد پایه','good'],['+0.25 درآمد به ازای هر قدرت خانه اطراف','good']],
+    bakery:[['+1.5 درآمد پایه','good'],['+0.25 درآمد به ازای هر قدرت خانه اطراف','good'],['+0.5 درآمد به ازای هر قدرت مزرعه اطراف','good'],['+0.25 درآمد به ازای هر قدرت مغازه اطراف','good']],
+    park:[['+0.5 درآمد','good'],['+1 لمس','good'],['+0.25 درآمد به ازای هر قدرت خانه اطراف','good']],
+    workshop:[['+3 لمس','good'],['+0.75 لمس به ازای هر قدرت مزرعه اطراف','good']],
+    farm:[['+2 لمس','good'],['+0.75 لمس به ازای هر قدرت کارگاه اطراف','good'],['+0.5 لمس به ازای هر قدرت نانوایی اطراف','good']]
+  }[type]||[];
+  buildingPanel.innerHTML='<button class="building-close" type="button" aria-label="بستن">×</button>'+\n    '<div class="building-panel-title">'+def.name+'</div>'+\n    '<div class="building-panel-meta">هزینه ساخت · '+def.cost.toLocaleString('fa-IR')+' تومان</div>'+\n    '<div class="construction-effects">'+effects.map(([text,kind])=>'<div class="construction-effect '+kind+'">'+text+'</div>').join('')+'</div>';
+  buildingPanel.classList.add('visible','construction-info');
+  buildingPanel.querySelector('.building-close').onclick=()=>buildingPanel.classList.remove('visible');
 }
 Object.keys(BUILDINGS).forEach(type=>{
   const def=BUILDINGS[type],button=document.createElement('button');
