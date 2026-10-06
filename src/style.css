@@ -239,3 +239,9 @@ canvas{
   font-size:10px;
 }
 @media (max-width:699px){#building-panel{top:42px}}
+
+.construction-info{right:12px;top:48px}
+.construction-effects{display:flex;flex-direction:column;gap:7px}
+.construction-effect{font-size:10px;padding:6px 8px;border-radius:7px;background:#eee8dd;border:1px solid #d4cbbd}
+.construction-effect.good{color:#3f7a4c}
+.construction-effect.bad{color:#a24b43}
