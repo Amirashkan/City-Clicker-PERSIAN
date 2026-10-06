@@ -29,7 +29,8 @@ function resize(){
   });
   render();
 }
-function validTile(x,y){return x>=0&&y>=0&&x<GRID&&y<GRID&&!state.buildings.some(b=>b.x===x&&b.y===y)}
+function buildingAtTile(x,y){return state.buildings.find(b=>b.x===x&&b.y===y)||null}
+function validTile(x,y){return x>=0&&y>=0&&x<GRID&&y<GRID&&!buildingAtTile(x,y)}
 function refreshEconomy(){state.economy=calculateEconomy(state.buildings)}
 function render(){
   if(!iso)return;
@@ -45,7 +46,7 @@ function render(){
 function choose(type){
   state.selected=type;state.buildMode=true;
   document.querySelectorAll('[data-building]').forEach(b=>b.classList.toggle('active',b.dataset.building===type));
-  hint.textContent='خانه را روی یک خانه خالی بگذار.';
+  hint.textContent=BUILDINGS[type].name+' را روی یک خانه خالی بگذار.';
 }
 Object.keys(BUILDINGS).forEach(type=>{
   const def=BUILDINGS[type],button=document.createElement('button');
@@ -64,13 +65,22 @@ function showClickFeedback(x,y){
   setTimeout(()=>pop.remove(),700);
 }
 function buildingAt(screenX,screenY){
+  const tile=iso.tileAt(screenX,screenY);
+  const onTile=buildingAtTile(tile.x,tile.y);
+  if(onTile)return onTile;
+
+  // Also allow tapping the raised body of a nearby building.
   for(const b of [...state.buildings].sort((a,b)=>(b.x+b.y)-(a.x+a.y))){
     const p=iso.worldToScreen(b.x+.5,b.y+.5),tw=iso.tileWidth,th=iso.tileHeight;
     const w=(b.w||.78)*tw,d=(b.d||.78)*th,h=b.h||34;
     const dx=Math.abs(screenX-p.x),dy=screenY-p.y;
-    if(b.type==='park'){if(dx<=tw*.42&&dy>=-30&&dy<=th*.55)return b;}
-    else if(b.type==='farm'){if(dx<=tw*.42&&dy>=-4&&dy<=th*1.05)return b;}
-    else if(dx<=w*.72&&dy>=-h-d*.8&&dy<=th*.7)return b;
+    if(b.type==='park'){
+      if(dx<=tw*.42&&dy>=-32&&dy<=th*.62)return b;
+    }else if(b.type==='farm'){
+      if(dx<=tw*.42&&dy>=-5&&dy<=th*1.08)return b;
+    }else if(dx<=w*.72&&dy>=-h-d*.8&&dy<=th*.72){
+      return b;
+    }
   }
   return null;
 }
@@ -132,11 +142,22 @@ canvas.addEventListener('pointerup',e=>{
   if(!p||p.moved)return;
   const r=canvas.getBoundingClientRect();
   const x=e.clientX-r.left,y=e.clientY-r.top;
-  const clickedBuilding=buildingAt(x,y);
-  if(clickedBuilding){showBuildingStatus(clickedBuilding);return}
+  const tile=iso.tileAt(x,y);
+
+  // A building always wins over build mode: tapping any part of its tile opens its status.
+  const clickedBuilding=buildingAt(x,y)||buildingAtTile(tile.x,tile.y);
+  if(clickedBuilding){
+    showBuildingStatus(clickedBuilding);
+    return;
+  }
+
   buildingPanel.classList.remove('visible');
-  if(!state.buildMode){manualClick(x,y);return}
-  const tile=iso.tileAt(x,y),def=BUILDINGS[state.selected];
+  if(!state.buildMode){
+    manualClick(x,y);
+    return;
+  }
+
+  const def=BUILDINGS[state.selected];
   if(!validTile(tile.x,tile.y)){
     hint.textContent='این خانه قابل ساخت نیست.';
     return;
@@ -145,10 +166,16 @@ canvas.addEventListener('pointerup',e=>{
     hint.textContent='پول کافی نیست.';
     return;
   }
+
   state.money-=def.cost;
-  state.buildings.push(createBuilding(state.selected,{x:tile.x,y:tile.y}));
+  const building=createBuilding(state.selected,{x:tile.x,y:tile.y});
+  state.buildings.push(building);
   refreshEconomy();
-  hint.textContent=def.name+' ساخته شد.';
+
+  // Construction is a one-shot action. Return immediately to the normal tap-to-earn state.
+  state.buildMode=false;
+  document.querySelectorAll('[data-building]').forEach(button=>button.classList.remove('active'));
+  hint.textContent=def.name+' ساخته شد؛ برای درآمد روی شهر بزن.';
   render();
 });
 canvas.addEventListener('pointercancel',()=>{state.pointer=null});
