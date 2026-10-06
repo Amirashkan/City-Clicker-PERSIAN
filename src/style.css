@@ -125,7 +125,7 @@ canvas{
 .dock-actions{display:flex;align-items:center;gap:4px}
 #construction-info-toggle{display:none;width:27px;height:27px;border:1px solid #c9c0b1;border-radius:8px;background:transparent;color:#756c60;font:inherit;font-size:16px;line-height:1;padding:0;cursor:pointer}
 #construction-info-toggle.visible{display:block}
-#cancel-build{border:0;background:transparent;color:#8a4d42;font:inherit;font-size:10px;padding:3px 6px}
+#cancel-build,#demolish-mode{border:0;background:transparent;color:#8a4d42;font:inherit;font-size:10px;padding:3px 6px}#demolish-mode.active{background:#8a4d42;color:#fff;border-radius:7px}
 #building-tools{
   display:flex;
   gap:7px;
@@ -254,6 +254,7 @@ canvas{
   opacity:.4;
   cursor:default;
 }
+.downgrade-building{width:100%;min-height:34px;margin-top:6px;border:1px solid #b9ad9d;border-radius:9px;background:transparent;color:#665c50;font:inherit;font-size:10px;padding:6px 10px;cursor:pointer}.downgrade-building:active{transform:scale(.99)}
 .building-maxed{
   padding-top:8px;
   border-top:1px solid #d8d0c3;
