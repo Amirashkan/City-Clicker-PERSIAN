@@ -155,7 +155,7 @@ function showRegionPurchase(region){
 }
 
 const state={
-  money:500,buildMode:false,selected:'house',hover:null,buildings:[],
+  money:500,buildMode:false,demolishMode:false,selected:'house',hover:null,buildings:[],
   zoom:1,
   economy:{autoClick:0,clickValue:1},
   panX:0,panY:0,pointer:null,effectRadiusBuilding:null,effectRadiusVisible:false
@@ -198,7 +198,8 @@ function render(){
   if(cityStatusPanel.classList.contains('visible'))updateCityStatus();
 }
 function choose(type){
-  state.selected=type;state.buildMode=true;
+  state.selected=type;state.buildMode=true;state.demolishMode=false;
+  document.querySelector('#demolish-mode')?.classList.remove('active');
   document.querySelectorAll('[data-building]').forEach(b=>b.classList.toggle('active',b.dataset.building===type));
   constructionInfoToggle.classList.add('visible');
   buildingPanel.classList.remove('visible');
@@ -296,6 +297,8 @@ function showBuildingStatus(b){
   state.effectRadiusBuilding=b;
 
   const upgradeCost=getUpgradeCost(b.type,level);
+  const downgradeCost=level>1?getUpgradeCost(b.type,level-1):null;
+  const downgradeMarkup=downgradeCost?'<button class="downgrade-building" type="button">تنزل به سطح '+(level-1)+' · بازگشت '+Math.floor(downgradeCost*.5).toLocaleString('fa-IR')+' تومان</button>':'';
   const upgradeMarkup=upgradeCost
     ? '<button class="upgrade-building" type="button" '+(state.money<upgradeCost?'disabled':'')+'>ارتقا به سطح '+(level+1)+' · '+upgradeCost.toLocaleString('fa-IR')+' تومان</button>'
     : '<div class="building-maxed">این ساختمان به حداکثر سطح رسیده است.</div>';
@@ -307,10 +310,12 @@ function showBuildingStatus(b){
     contribution.map(e=>'<span class="building-effect">'+e+'</span>').join('')+
     effectLines.map(e=>'<span class="building-effect">'+e+'</span>').join('')+
     '</div>'+
-    '<div class="effect-radius-wrap">'+radiusButton+'</div>'+'<div class="upgrade-wrap">'+upgradeMarkup+'</div>';
+    '<div class="effect-radius-wrap">'+radiusButton+'</div>'+'<div class="upgrade-wrap">'+upgradeMarkup+downgradeMarkup+'</div>';
 
   buildingPanel.classList.add('visible');buildingPanel.querySelector('.effect-radius-toggle').onclick=()=>{state.effectRadiusVisible=!state.effectRadiusVisible;showBuildingStatus(b);render()};
   buildingPanel.querySelector('.building-close').onclick=()=>buildingPanel.classList.remove('visible');
+  const downgradeButton=buildingPanel.querySelector('.downgrade-building');
+  if(downgradeButton)downgradeButton.onclick=()=>{const freshCost=getUpgradeCost(b.type,(b.level||1)-1);if(!freshCost||b.level<=1)return;state.money+=Math.floor(freshCost*.5);b.level=Math.max(1,b.level-1);refreshEconomy();saveGame();hint.textContent=def.name+' به سطح '+b.level+' برگشت.';showBuildingStatus(b);render()};
   const upgradeButton=buildingPanel.querySelector('.upgrade-building');
   if(upgradeButton){
     upgradeButton.onclick=()=>{
@@ -333,13 +338,20 @@ function manualClick(x,y){
   render();
 }
 function cancelBuild(){
-  state.effectRadiusVisible=false;state.effectRadiusBuilding=null;state.buildMode=false;
+  state.effectRadiusVisible=false;state.demolishMode=false;
+  document.querySelector('#demolish-mode')?.classList.remove('active');state.effectRadiusBuilding=null;state.buildMode=false;
   constructionInfoToggle.classList.remove('visible');
   buildingPanel.classList.remove('visible');
   document.querySelectorAll('[data-building]').forEach(b=>b.classList.remove('active'));
   hint.textContent='برای درآمد روی شهر بزن.';
 }
 document.querySelector('#cancel-build').addEventListener('click',cancelBuild);
+const demolishButton=document.querySelector('#demolish-mode');
+demolishButton.addEventListener('click',()=>{
+  state.demolishMode=!state.demolishMode;state.buildMode=false;constructionInfoToggle.classList.remove('visible');buildingPanel.classList.remove('visible');
+  document.querySelectorAll('[data-building]').forEach(b=>b.classList.remove('active'));demolishButton.classList.toggle('active',state.demolishMode);
+  hint.textContent=state.demolishMode?'بولدوزر فعال است؛ روی ساختمان بزن تا حذف شود.':'برای درآمد روی شهر بزن.';
+});
 constructionInfoToggle.addEventListener('click',()=>{
   if(!state.buildMode)return;
   if(buildingPanel.classList.contains('visible')) buildingPanel.classList.remove('visible');
@@ -381,7 +393,11 @@ canvas.addEventListener('pointerup',e=>{
 
   const clickedBuilding=buildingAt(x,y)||buildingAtTile(tile.x,tile.y);
   if(clickedBuilding){
-    showBuildingStatus(clickedBuilding);
+    if(state.demolishMode){
+      const level=clickedBuilding.level||1;let invested=BUILDINGS[clickedBuilding.type].cost;
+      for(let l=1;l<level;l++)invested+=getUpgradeCost(clickedBuilding.type,l)||0;
+      const refund=Math.floor(invested*.75);state.money+=refund;state.buildings=state.buildings.filter(item=>item!==clickedBuilding);refreshEconomy();saveGame();buildingPanel.classList.remove('visible');hint.textContent=BUILDINGS[clickedBuilding.type].name+' حذف شد؛ '+refund.toLocaleString('fa-IR')+' تومان بازگشت.';render();
+    }else showBuildingStatus(clickedBuilding);
     return;
   }
 
