@@ -25,5 +25,5 @@ export function createBuilding(type,position){
   const def=BUILDINGS[type];
   if(!def)throw new Error('Unknown building type: '+type);
   const seed=Math.random();
-  return{id:crypto.randomUUID(),type,...def.generate({...position,seed}),...def.economy};
+  return{id:crypto.randomUUID(),type,...def.generate({...position,seed}),...def.economy,builtAt:Date.now()};
 }
