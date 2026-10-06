@@ -64,25 +64,36 @@ function showClickFeedback(x,y){
   feedback.appendChild(pop);
   setTimeout(()=>pop.remove(),700);
 }
+function pointInDiamond(px,py,cx,cy,halfW,halfH){
+  return Math.abs(px-cx)/halfW + Math.abs(py-cy)/halfH <= 1;
+}
 function buildingAt(screenX,screenY){
-  const tile=iso.tileAt(screenX,screenY);
-  const onTile=buildingAtTile(tile.x,tile.y);
-  if(onTile)return onTile;
+  const ordered=[...state.buildings].sort((a,b)=>{
+    const az=a.x+a.y,bz=b.x+b.y;
+    return bz-az;
+  });
 
-  // Also allow tapping the raised body of a nearby building.
-  for(const b of [...state.buildings].sort((a,b)=>(b.x+b.y)-(a.x+a.y))){
-    const p=iso.worldToScreen(b.x+.5,b.y+.5),tw=iso.tileWidth,th=iso.tileHeight;
-    const w=(b.w||.78)*tw,d=(b.d||.78)*th,h=b.h||34;
-    const dx=Math.abs(screenX-p.x),dy=screenY-p.y;
+  // First hit the visible building body. This prevents a tall building beside
+  // another tile from selecting the neighboring house underneath it.
+  for(const b of ordered){
+    const p=iso.worldToScreen(b.x+.5,b.y+.5);
+    const tw=iso.tileWidth,th=iso.tileHeight,h=b.h||34;
+    const halfW=(b.w||.78)*tw*.72;
+    const halfH=(b.d||.78)*th*.85;
     if(b.type==='park'){
-      if(dx<=tw*.42&&dy>=-32&&dy<=th*.62)return b;
+      if(pointInDiamond(screenX,screenY,p.x,p.y-.02*th,tw*.42,th*.72) ||
+         pointInDiamond(screenX,screenY,p.x,p.y-16,tw*.30,th*.55)) return b;
     }else if(b.type==='farm'){
-      if(dx<=tw*.42&&dy>=-5&&dy<=th*1.08)return b;
-    }else if(dx<=w*.72&&dy>=-h-d*.8&&dy<=th*.72){
-      return b;
+      if(pointInDiamond(screenX,screenY,p.x,p.y,tw*.42,th*.62)) return b;
+    }else{
+      const bodyCenterY=p.y-h*.42;
+      if(pointInDiamond(screenX,screenY,p.x,bodyCenterY,halfW,Math.max(th*.62,h*.58))) return b;
     }
   }
-  return null;
+
+  // Then fall back to the exact occupied grid cell.
+  const tile=iso.tileAt(screenX,screenY);
+  return buildingAtTile(tile.x,tile.y);
 }
 function showBuildingStatus(b){
   const def=BUILDINGS[b.type];
