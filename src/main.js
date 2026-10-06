@@ -22,10 +22,11 @@ function resize(){
   const dpr=Math.min(devicePixelRatio||1,2),r=canvas.getBoundingClientRect();
   canvas.width=r.width*dpr;canvas.height=r.height*dpr;
   ctx.setTransform(dpr,0,0,dpr,0,0);
-  const tileWidth=Math.max(34,Math.min(54,r.width/8.2));
-  const tileHeight=tileWidth/2;
+  const baseTileWidth=Math.max(34,Math.min(54,r.width/8.2));
+  const tileWidth=baseTileWidth*state.zoom;
+  const tileHeight=(baseTileWidth/2)*state.zoom;
   iso=new IsoProjection({
-    tileWidth:tileWidth*state.zoom,tileHeight,
+    tileWidth,tileHeight,
     originX:r.width/2+state.panX,
     originY:Math.max(55,r.height*.20)+state.panY
   });
@@ -194,29 +195,61 @@ canvas.addEventListener('pointerup',e=>{
 canvas.addEventListener('pointercancel',()=>{state.pointer=null});
 
 let pinch=null;
-canvas.addEventListener('pointerdown',e=>{
-  if(e.pointerType==='touch'){
-    const pts=[...canvas.setPointerCapture?[]:[]];
-  }
-});
 const touches=new Map();
+
+function zoomAt(screenX,screenY,nextZoom){
+  if(!iso)return;
+  const before=iso.screenToWorld(screenX,screenY);
+  state.zoom=Math.max(.65,Math.min(1.8,nextZoom));
+  resize();
+  const after=iso.worldToScreen(before.x,before.y);
+  state.panX+=screenX-after.x;
+  state.panY+=screenY-after.y;
+  resize();
+}
+
+canvas.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const r=canvas.getBoundingClientRect();
+  const x=e.clientX-r.left,y=e.clientY-r.top;
+  const factor=Math.exp(-e.deltaY*.0015);
+  zoomAt(x,y,state.zoom*factor);
+},{passive:false});
+
 canvas.addEventListener('pointerdown',e=>{
   if(e.pointerType!=='touch')return;
   touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
   if(touches.size===2){
     const p=[...touches.values()];
-    pinch={distance:Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y),zoom:state.zoom};
+    const cx=(p[0].x+p[1].x)/2,cy=(p[0].y+p[1].y)/2;
+    const r=canvas.getBoundingClientRect();
+    pinch={
+      distance:Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y),
+      zoom:state.zoom,
+      centerX:cx-r.left,
+      centerY:cy-r.top,
+      panX:state.panX,
+      panY:state.panY
+    };
+    state.pointer=null;
   }
 });
+
 canvas.addEventListener('pointermove',e=>{
   if(e.pointerType!=='touch'||!touches.has(e.pointerId)||!pinch)return;
   touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
   const p=[...touches.values()];
   if(p.length!==2)return;
   const d=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);
-  state.zoom=Math.max(.65,Math.min(1.8,pinch.zoom*d/pinch.distance));
+  const cx=(p[0].x+p[1].x)/2,cy=(p[0].y+p[1].y)/2;
+  const r=canvas.getBoundingClientRect();
+  const ratio=d/pinch.distance;
+  state.zoom=Math.max(.65,Math.min(1.8,pinch.zoom*ratio));
+  state.panX=pinch.panX+(cx-r.left-pinch.centerX);
+  state.panY=pinch.panY+(cy-r.top-pinch.centerY);
   resize();
 });
+
 function endTouch(e){
   if(e.pointerType!=='touch')return;
   touches.delete(e.pointerId);
