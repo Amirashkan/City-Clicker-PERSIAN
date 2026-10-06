@@ -10,6 +10,8 @@ const canvas=document.querySelector('#city'),ctx=canvas.getContext('2d');
 const moneyEl=document.querySelector('#money'),incomeEl=document.querySelector('#income'),clickEl=document.querySelector('#click-value');
 const hint=document.querySelector('#hint'),tools=document.querySelector('#building-tools'),feedback=document.querySelector('#click-feedback');
 const buildingPanel=document.querySelector('#building-panel');
+const cityStatusPanel=document.querySelector('#city-status-panel');
+const cityStatusButton=document.querySelector('#city-status-button');
 const constructionInfoToggle=document.querySelector('#construction-info-toggle');
 
 // --- User settings ---------------------------------------------------------
@@ -29,6 +31,55 @@ function applySettings(){
   document.querySelectorAll('[data-ui-size]').forEach(b=>b.classList.toggle('active',b.dataset.uiSize===uiSettings.uiSize));
   try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(uiSettings))}catch{}
 }
+const cityStatusEls={
+  money:document.querySelector('#city-status-money'),income:document.querySelector('#city-status-income'),click:document.querySelector('#city-status-click'),
+  total:document.querySelector('#city-status-total'),houses:document.querySelector('#city-status-houses'),shops:document.querySelector('#city-status-shops'),
+  bakeries:document.querySelector('#city-status-bakeries'),parks:document.querySelector('#city-status-parks'),workshops:document.querySelector('#city-status-workshops'),
+  farms:document.querySelector('#city-status-farms'),land:document.querySelector('#city-status-land'),level:document.querySelector('#city-status-level'),
+  maxed:document.querySelector('#city-status-maxed'),influence:document.querySelector('#city-status-influence'),radius:document.querySelector('#city-status-radius')
+};
+function updateCityStatus(){
+  const counts={house:0,shop:0,bakery:0,park:0,workshop:0,farm:0};
+  let levelSum=0,maxed=0,influence=0,radius=0;
+  for(const b of state.buildings){
+    counts[b.type]=(counts[b.type]||0)+1;
+    const level=b.level||1;
+    levelSum+=level;
+    if(level>=3)maxed++;
+    const stats=getLevelStats(level);
+    influence+=stats.multiplier;
+    radius+=stats.radius;
+  }
+  const total=state.buildings.length;
+  const land=Math.round(total/(GRID*GRID)*100);
+  cityStatusEls.money.textContent=Math.floor(state.money).toLocaleString('fa-IR');
+  cityStatusEls.income.textContent=state.economy.autoClick.toLocaleString('fa-IR',{maximumFractionDigits:1});
+  cityStatusEls.click.textContent=state.economy.clickValue.toLocaleString('fa-IR',{maximumFractionDigits:1});
+  cityStatusEls.total.textContent=total.toLocaleString('fa-IR');
+  cityStatusEls.houses.textContent=counts.house.toLocaleString('fa-IR');
+  cityStatusEls.shops.textContent=counts.shop.toLocaleString('fa-IR');
+  cityStatusEls.bakeries.textContent=counts.bakery.toLocaleString('fa-IR');
+  cityStatusEls.parks.textContent=counts.park.toLocaleString('fa-IR');
+  cityStatusEls.workshops.textContent=counts.workshop.toLocaleString('fa-IR');
+  cityStatusEls.farms.textContent=counts.farm.toLocaleString('fa-IR');
+  cityStatusEls.land.textContent=land.toLocaleString('fa-IR')+'٪';
+  cityStatusEls.level.textContent=(total?levelSum/total:1).toLocaleString('fa-IR',{maximumFractionDigits:2});
+  cityStatusEls.maxed.textContent=maxed.toLocaleString('fa-IR');
+  cityStatusEls.influence.textContent=influence.toLocaleString('fa-IR',{maximumFractionDigits:1});
+  cityStatusEls.radius.textContent=radius.toLocaleString('fa-IR');
+}
+cityStatusButton.addEventListener('click',()=>{
+  updateCityStatus();
+  cityStatusPanel.classList.add('visible');
+  cityStatusPanel.setAttribute('aria-hidden','false');
+});
+function closeCityStatus(){
+  cityStatusPanel.classList.remove('visible');
+  cityStatusPanel.setAttribute('aria-hidden','true');
+}
+document.querySelector('#city-status-close').addEventListener('click',closeCityStatus);
+cityStatusPanel.addEventListener('click',e=>{if(e.target===cityStatusPanel)closeCityStatus()});
+
 const settingsPanel=document.querySelector('#settings-panel');
 document.querySelector('#settings-button').addEventListener('click',()=>{
   settingsPanel.classList.add('visible');
@@ -87,6 +138,7 @@ function render(){
   moneyEl.textContent=Math.floor(state.money).toLocaleString('fa-IR');
   incomeEl.textContent=state.economy.autoClick.toLocaleString('fa-IR',{maximumFractionDigits:1});
   clickEl.textContent=state.economy.clickValue.toLocaleString('fa-IR');
+  if(cityStatusPanel.classList.contains('visible'))updateCityStatus();
 }
 function choose(type){
   state.selected=type;state.buildMode=true;
