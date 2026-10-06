@@ -122,14 +122,10 @@ canvas{
   padding:0 2px;
 }
 .dock-head strong{font-size:11px}
-#cancel-build{
-  border:0;
-  background:transparent;
-  color:#8a4d42;
-  font:inherit;
-  font-size:10px;
-  padding:3px 6px;
-}
+.dock-actions{display:flex;align-items:center;gap:4px}
+#construction-info-toggle{display:none;width:27px;height:27px;border:1px solid #c9c0b1;border-radius:8px;background:transparent;color:#756c60;font:inherit;font-size:16px;line-height:1;padding:0;cursor:pointer}
+#construction-info-toggle.visible{display:block}
+#cancel-build{border:0;background:transparent;color:#8a4d42;font:inherit;font-size:10px;padding:3px 6px}
 #building-tools{
   display:flex;
   gap:7px;
@@ -353,6 +349,7 @@ canvas{
 :root.dark .construction-effect{background:#34312b;border-color:#4a443b}
 :root.dark .building-effect{border-color:#4a443b;color:#d7d0c5}
 :root.dark .mini-stat{border-color:var(--border)}
+:root.dark #construction-info-toggle{border-color:var(--border);color:var(--muted)}
 :root.dark .mini-stat span,
 :root.dark .mini-stat small,
 :root.dark .money-stat span,
