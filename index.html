@@ -14,6 +14,7 @@
       <span>City Clicker</span>
     </div>
 
+    <button id="settings-button" class="settings-button" type="button" aria-label="تنظیمات">⚙</button>
     <div class="hud">
       <div class="money-stat">
         <b id="money">۵۰۰</b>
@@ -30,6 +31,28 @@
       </div>
     </div>
   </header>
+
+  <div id="settings-panel" class="settings-panel" aria-hidden="true">
+    <div class="settings-card">
+      <button id="settings-close" class="settings-close" type="button" aria-label="بستن">×</button>
+      <div class="settings-title">تنظیمات</div>
+      <div class="settings-group">
+        <div class="settings-label">حالت نمایش</div>
+        <div class="settings-options" role="group" aria-label="حالت نمایش">
+          <button type="button" data-theme="light">روشن</button>
+          <button type="button" data-theme="dark">تاریک</button>
+        </div>
+      </div>
+      <div class="settings-group">
+        <div class="settings-label">سایز رابط کاربری</div>
+        <div class="ui-size-row">
+          <button type="button" data-ui-size="small">کوچک</button>
+          <button type="button" data-ui-size="normal">معمولی</button>
+          <button type="button" data-ui-size="large">بزرگ</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <section class="city-stage">
     <canvas id="city" aria-label="شهر؛ برای دریافت پول لمس کنید"></canvas>
