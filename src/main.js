@@ -132,6 +132,9 @@ canvas.addEventListener('pointerup',e=>{
   if(!p||p.moved)return;
   const r=canvas.getBoundingClientRect();
   const x=e.clientX-r.left,y=e.clientY-r.top;
+  const clickedBuilding=buildingAt(x,y);
+  if(clickedBuilding){showBuildingStatus(clickedBuilding);return}
+  buildingPanel.classList.remove('visible');
   if(!state.buildMode){manualClick(x,y);return}
   const tile=iso.tileAt(x,y),def=BUILDINGS[state.selected];
   if(!validTile(tile.x,tile.y)){
