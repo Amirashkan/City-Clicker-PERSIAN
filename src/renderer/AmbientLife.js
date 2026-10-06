@@ -30,13 +30,16 @@ function routePoint(route,t){
 
 function makePeople(buildings){
   const homes=candidates(buildings,['house']);
-  const destinations=candidates(buildings,['shop','bakery','workshop']);
+  const destinations=candidates(buildings,['shop','bakery','workshop','park']);
   if(!homes.length||!destinations.length)return [];
-  return Array.from({length:Math.min(PEOPLE_COUNT,homes.length*3)},(_,i)=>{
-    const from=homes[i%homes.length];
-    const to=destinations[(i*2+1)%destinations.length];
-    return {route:buildRoute(from,to),t:(i*.17)%1,speed:.000035+(i%4)*.000006,wait:0,active:true};
-  });
+  const routes=[];
+  for(let i=0;i<PEOPLE_COUNT;i++){
+    const toHome=i%2===1;
+    const from=toHome?destinations[(i*2+1)%destinations.length]:homes[i%homes.length];
+    const to=toHome?homes[(i+1)%homes.length]:destinations[(i*2+1)%destinations.length];
+    routes.push({route:buildRoute(from,to),t:(i*.17)%1,speed:.000035+(i%4)*.000006,wait:0,active:true});
+  }
+  return routes;
 }
 
 function makeCars(buildings){
