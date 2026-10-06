@@ -102,7 +102,25 @@ applySettings();
 
 const GRID=15;
 const mapMask=generateMapMask(GRID,GRID);
-const state={
+// --- Purchasable map regions ----------------------------------------------
+const REGION_KEY='city-clicker-regions';
+const REGION_DEFS=[
+{id:'north',name:'منطقه شمالی',cost:2500,tiles:[[6,0],[7,0],[8,0],[6,1],[7,1],[8,1]]},
+{id:'east',name:'منطقه شرقی',cost:5000,tiles:[[13,6],[14,6],[13,7],[14,7],[13,8],[14,8]]},
+{id:'south',name:'منطقه جنوبی',cost:8500,tiles:[[6,13],[7,13],[8,13],[6,14],[7,14],[8,14]]},
+{id:'west',name:'منطقه غربی',cost:12000,tiles:[[0,6],[1,6],[0,7],[1,7],[0,8],[1,8]]}
+];
+let purchasedRegions=[];
+try{purchasedRegions=JSON.parse(localStorage.getItem(REGION_KEY)||'[]').filter(id=>REGION_DEFS.some(r=>r.id===id));}catch{}
+function saveRegions(){try{localStorage.setItem(REGION_KEY,JSON.stringify(purchasedRegions))}catch{}}
+function regionAtTile(x,y){return REGION_DEFS.find(r=>r.tiles.some(([tx,ty])=>tx===x&&ty===y))||null}
+function isRegionPurchased(r){return purchasedRegions.includes(r.id)}
+function isUnlockedTile(x,y){return !!mapMask[y]?.[x]&&(!regionAtTile(x,y)||isRegionPurchased(regionAtTile(x,y)))}
+function showRegionPurchase(region){
+ buildingPanel.innerHTML='<button class="building-close" type="button" aria-label="بستن">×</button><div class="building-panel-title">'+region.name+'</div><div class="building-panel-meta">این منطقه هنوز خریداری نشده است.</div><div class="building-panel-grid"><span>هزینه خرید</span><b>'+region.cost.toLocaleString('fa-IR')+' تومان</b><span class="building-effect">بعد از خرید، خانه‌های این منطقه برای ساخت‌وساز باز می‌شوند.</span></div><button class="upgrade-building" type="button" '+(state.money<region.cost?'disabled':'')+'>خرید منطقه · '+region.cost.toLocaleString('fa-IR')+' تومان</button>';
+ buildingPanel.classList.add('visible');buildingPanel.querySelector('.building-close').onclick=()=>buildingPanel.classList.remove('visible');buildingPanel.querySelector('.upgrade-building').onclick=()=>{if(state.money>=region.cost){state.money-=region.cost;purchasedRegions.push(region.id);saveRegions();buildingPanel.classList.remove('visible');hint.textContent=region.name+' خریداری شد.';render()}};
+}
+\nconst state={
   money:500,buildMode:false,selected:'house',hover:null,buildings:[],
   zoom:1,
   economy:{autoClick:0,clickValue:1},
@@ -125,7 +143,7 @@ function resize(){
   render();
 }
 function buildingAtTile(x,y){return state.buildings.find(b=>b.x===x&&b.y===y)||null}
-function validTile(x,y){return x>=0&&y>=0&&x<GRID&&y<GRID&&!!mapMask[y]?.[x]&&!buildingAtTile(x,y)}
+function validTile(x,y){return x>=0&&y>=0&&x<GRID&&y<GRID&&isUnlockedTile(x,y)&&!buildingAtTile(x,y)}
 function refreshEconomy(){state.economy=calculateEconomy(state.buildings)}
 function render(){
   if(!iso)return;
@@ -317,7 +335,7 @@ canvas.addEventListener('pointerup',e=>{
   const tile=iso.tileAt(x,y);
 
   // A building always wins over build mode: tapping any part of its tile opens its status.
-  const clickedBuilding=buildingAt(x,y)||buildingAtTile(tile.x,tile.y);
+  const region=regionAtTile(tile.x,tile.y);\n  if(region&&!isRegionPurchased(region)){showRegionPurchase(region);return;}\n\n  const clickedBuilding=buildingAt(x,y)||buildingAtTile(tile.x,tile.y);
   if(clickedBuilding){
     showBuildingStatus(clickedBuilding);
     return;
