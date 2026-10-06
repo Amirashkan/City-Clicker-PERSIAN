@@ -1,4 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap');
+@font-face{
+  font-family:'Vazirmatn';
+  src:url('/fonts/Vazirmatn-Regular.ttf') format('truetype');
+  font-weight:400 700;
+  font-style:normal;
+  font-display:swap;
+}
 
 :root{
   font-family:'Vazirmatn',Tahoma,Arial,sans-serif;
