@@ -53,7 +53,7 @@ const state={
   money:500,buildMode:false,selected:'house',hover:null,buildings:[],
   zoom:1,
   economy:{autoClick:0,clickValue:1},
-  panX:0,panY:0,pointer:null
+  panX:0,panY:0,pointer:null,effectRadiusBuilding:null,effectRadiusVisible:false
 };
 let iso;
 
@@ -78,7 +78,7 @@ function render(){
   if(!iso)return;
   const r=canvas.getBoundingClientRect();
   ctx.clearRect(0,0,r.width,r.height);
-  drawGrid(ctx,iso,GRID,GRID,state.hover);
+  drawGrid(ctx,iso,GRID,GRID,state.hover);if(state.effectRadiusVisible&&state.effectRadiusBuilding)drawEffectRadius(state.effectRadiusBuilding);
   drawAmbientLife(ctx,iso,performance.now(),state.buildings);
   [...state.buildings].sort((a,b)=>(a.x+a.y)-(b.x+b.y))
     .forEach(b=>drawBuilding(ctx,iso,b,state.hover?.x===b.x&&state.hover?.y===b.y));
@@ -157,6 +157,17 @@ function buildingAt(screenX,screenY){
   const tile=iso.tileAt(screenX,screenY);
   return buildingAtTile(tile.x,tile.y);
 }
+function drawEffectRadius(b){
+const radius=getLevelStats(b.level||1).radius;
+ctx.save();
+for(let y=Math.max(0,b.y-radius);y<=Math.min(GRID-1,b.y+radius);y++)for(let x=Math.max(0,b.x-radius);x<=Math.min(GRID-1,b.x+radius);x++){
+if(Math.max(Math.abs(x-b.x),Math.abs(y-b.y))>radius)continue;
+const p1=iso.worldToScreen(x,y),p2=iso.worldToScreen(x+1,y),p3=iso.worldToScreen(x+1,y+1),p4=iso.worldToScreen(x,y+1);
+ctx.beginPath();ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);ctx.lineTo(p3.x,p3.y);ctx.lineTo(p4.x,p4.y);ctx.closePath();ctx.fillStyle='rgba(82,118,91,.16)';ctx.strokeStyle='rgba(82,118,91,.42)';ctx.lineWidth=1;ctx.fill();ctx.stroke();
+}
+const top=iso.worldToScreen(b.x+.5,b.y-radius),right=iso.worldToScreen(b.x+radius+1,b.y+.5),bottom=iso.worldToScreen(b.x+.5,b.y+radius+1),left=iso.worldToScreen(b.x-radius,b.y+.5);
+ctx.beginPath();ctx.moveTo(top.x,top.y);ctx.lineTo(right.x,right.y);ctx.lineTo(bottom.x,bottom.y);ctx.lineTo(left.x,left.y);ctx.closePath();ctx.strokeStyle='rgba(58,91,69,.78)';ctx.lineWidth=2;ctx.setLineDash([6,4]);ctx.stroke();ctx.restore();
+}
 function showBuildingStatus(b){
   const def=BUILDINGS[b.type];
   const result=evaluateBuilding(b,state.buildings);
@@ -179,9 +190,9 @@ function showBuildingStatus(b){
     contribution.map(e=>'<span class="building-effect">'+e+'</span>').join('')+
     effectLines.map(e=>'<span class="building-effect">'+e+'</span>').join('')+
     '</div>'+
-    '<div class="upgrade-wrap">'+upgradeMarkup+'</div>';
+    '<div class="effect-radius-wrap">'+radiusButton+'</div>'+'<div class="upgrade-wrap">'+upgradeMarkup+'</div>';
 
-  buildingPanel.classList.add('visible');
+  buildingPanel.classList.add('visible');buildingPanel.querySelector('.effect-radius-toggle').onclick=()=>{state.effectRadiusVisible=!state.effectRadiusVisible;showBuildingStatus(b);render()};
   buildingPanel.querySelector('.building-close').onclick=()=>buildingPanel.classList.remove('visible');
   const upgradeButton=buildingPanel.querySelector('.upgrade-building');
   if(upgradeButton){
@@ -203,7 +214,7 @@ function manualClick(x,y){
   render();
 }
 function cancelBuild(){
-  state.buildMode=false;
+  state.effectRadiusVisible=false;state.effectRadiusBuilding=null;state.buildMode=false;
   constructionInfoToggle.classList.remove('visible');
   buildingPanel.classList.remove('visible');
   document.querySelectorAll('[data-building]').forEach(b=>b.classList.remove('active'));
@@ -252,7 +263,7 @@ canvas.addEventListener('pointerup',e=>{
     return;
   }
 
-  buildingPanel.classList.remove('visible');
+  buildingPanel.classList.remove('visible');state.effectRadiusVisible=false;state.effectRadiusBuilding=null;
   if(!state.buildMode){
     manualClick(x,y);
     return;
