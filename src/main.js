@@ -38,7 +38,7 @@ function render(){
   const r=canvas.getBoundingClientRect();
   ctx.clearRect(0,0,r.width,r.height);
   drawGrid(ctx,iso,GRID,GRID,state.hover);
-  drawAmbientLife(ctx,iso,performance.now());
+  drawAmbientLife(ctx,iso,performance.now(),state.buildings);
   [...state.buildings].sort((a,b)=>(a.x+a.y)-(b.x+b.y))
     .forEach(b=>drawBuilding(ctx,iso,b,state.hover?.x===b.x&&state.hover?.y===b.y));
   moneyEl.textContent=Math.floor(state.money).toLocaleString('fa-IR');
