@@ -2,33 +2,49 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>شهر — City Clicker</title>
 <link rel="stylesheet" href="./src/style.css">
 </head>
 <body>
 <main id="app">
-<header>
-  <div><h1>شهر</h1><span>City Clicker — Persian</span></div>
-  <div class="stats">
-    <b id="money">۵۰۰</b><span>تومان</span>
-    <i></i><b id="income">۰</b><span>در ثانیه</span>
-    <i></i><b id="click-value">۱</b><span>هر کلیک</span>
-  </div>
-</header>
-<section class="toolbar">
-  <div id="building-tools"></div>
-  <button id="cancel-build">لغو</button>
-  <span id="hint">ساختمان انتخاب کن.</span>
-</section>
-<section class="city-stage">
-  <canvas id="city"></canvas>
-  <button id="earn" class="click-core" aria-label="کلیک برای دریافت پول">
-    <strong>کلیک</strong>
-    <small>+<span id="click-amount">۱</span> تومان</small>
-  </button>
-  <div id="click-feedback" aria-hidden="true"></div>
-</section>
+  <header class="topbar">
+    <div class="brand">
+      <h1>شهر</h1>
+      <span>City Clicker</span>
+    </div>
+
+    <div class="hud">
+      <div class="money-stat">
+        <b id="money">۵۰۰</b>
+        <span>تومان</span>
+      </div>
+      <div class="mini-stat">
+        <span>درآمد</span>
+        <b id="income">۰</b>
+        <small>/ ثانیه</small>
+      </div>
+      <div class="mini-stat">
+        <span>هر لمس</span>
+        <b id="click-value">۱</b>
+      </div>
+    </div>
+  </header>
+
+  <section class="city-stage">
+    <canvas id="city" aria-label="شهر؛ برای دریافت پول لمس کنید"></canvas>
+
+    <div id="hint" class="hint" aria-live="polite">برای درآمد روی شهر بزن.</div>
+    <div id="click-feedback" aria-hidden="true"></div>
+
+    <section class="build-dock" aria-label="ساختمان‌ها">
+      <div class="dock-head">
+        <strong>ساخت‌وساز</strong>
+        <button id="cancel-build" type="button">لغو</button>
+      </div>
+      <div id="building-tools"></div>
+    </section>
+  </section>
 </main>
 <script type="module" src="./src/main.js"></script>
 </body>
