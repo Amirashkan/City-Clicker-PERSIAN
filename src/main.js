@@ -47,17 +47,6 @@ function render(){
   incomeEl.textContent=state.economy.autoClick.toLocaleString('fa-IR',{maximumFractionDigits:1});
   clickEl.textContent=state.economy.clickValue.toLocaleString('fa-IR');
 }
-function constructionEffect(type){
-  const effects={
-    house:['+1 درآمد'],
-    shop:['+0.25 درآمد / خانه'],
-    bakery:['+1.5 درآمد','+0.25 / خانه','+0.5 / مزرعه','+0.25 / مغازه'],
-    park:['+0.5 درآمد','+1 لمس','+0.25 / خانه'],
-    workshop:['+3 لمس','+0.75 / مزرعه'],
-    farm:['+2 لمس','+0.75 / کارگاه','+0.5 / نانوایی']
-  };
-  return (effects[type]||[]).map(e=>'<span class="effect-good">'+e+'</span>').join(' ');
-}
 function choose(type){
   state.selected=type;state.buildMode=true;
   document.querySelectorAll('[data-building]').forEach(b=>b.classList.toggle('active',b.dataset.building===type));
@@ -66,7 +55,7 @@ function choose(type){
 Object.keys(BUILDINGS).forEach(type=>{
   const def=BUILDINGS[type],button=document.createElement('button');
   button.dataset.building=type;
-  button.innerHTML='<strong>'+def.name+'</strong><small>'+def.cost.toLocaleString('fa-IR')+' تومان</small><em>'+constructionEffect(type)+'</em>';
+  button.innerHTML=def.name+' <small>'+def.cost.toLocaleString('fa-IR')+'</small>';
   button.type='button';
   button.addEventListener('click',()=>choose(type));
   tools.appendChild(button);
