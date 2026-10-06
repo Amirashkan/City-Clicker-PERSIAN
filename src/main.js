@@ -99,6 +99,22 @@ document.querySelectorAll('[data-ui-size]').forEach(button=>{
   button.addEventListener('click',()=>{uiSettings.uiSize=button.dataset.uiSize;applySettings()});
 });
 document.querySelector('#reset-game').addEventListener('click',resetGame);
+
+function setupInfoPanel(buttonId,panelId,closeId){
+  const panel=document.querySelector(panelId);
+  document.querySelector(buttonId).addEventListener('click',()=>{
+    settingsPanel.classList.remove('visible');
+    settingsPanel.setAttribute('aria-hidden','true');
+    panel.classList.add('visible');
+    panel.setAttribute('aria-hidden','false');
+  });
+  const close=()=>{panel.classList.remove('visible');panel.setAttribute('aria-hidden','true')};
+  document.querySelector(closeId).addEventListener('click',close);
+  panel.addEventListener('click',e=>{if(e.target===panel)close()});
+}
+setupInfoPanel('#game-guide-button','#game-guide-panel','#game-guide-close');
+setupInfoPanel('#about-game-button','#about-game-panel','#about-game-close');
+
 applySettings();
 // ---------------------------------------------------------------------------
 
