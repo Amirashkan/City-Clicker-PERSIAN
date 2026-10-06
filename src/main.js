@@ -108,7 +108,7 @@ function showConstructionInfo(type){
     '<div class="building-panel-meta">اثر پایه و تمام اثرهای اطراف</div>'+
     '<div class="construction-effects">'+effects.map(([text,kind])=>'<div class="construction-effect '+kind+'">'+text+'</div>').join('')+'</div>';
   buildingPanel.classList.add('construction-info','visible');
-  buildingPanel.querySelector('.building-close').onclick=()=>buildingPanel.classList.remove('visible');
+  buildingPanel.querySelector('.building-close').onclick=()=>{buildingPanel.classList.remove('visible');state.effectRadiusVisible=false;state.effectRadiusBuilding=null;render()};
 }
 Object.keys(BUILDINGS).forEach(type=>{
   const def=BUILDINGS[type],button=document.createElement('button');
@@ -177,6 +177,11 @@ function showBuildingStatus(b){
   const contribution=[];
   if(result.autoClick)contribution.push('درآمد این ساختمان: +'+result.autoClick.toLocaleString('fa-IR',{maximumFractionDigits:2})+' در ثانیه');
   if(result.clickValue)contribution.push('ارزش لمس از این ساختمان: +'+result.clickValue.toLocaleString('fa-IR',{maximumFractionDigits:2}));
+
+  const radiusButton=state.effectRadiusVisible&&state.effectRadiusBuilding===b
+    ? '<button class="effect-radius-toggle active" type="button">پنهان کردن شعاع اثر</button>'
+    : '<button class="effect-radius-toggle" type="button">نمایش شعاع اثر</button>';
+  state.effectRadiusBuilding=b;
 
   const upgradeCost=getUpgradeCost(b.type,level);
   const upgradeMarkup=upgradeCost
