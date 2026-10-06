@@ -103,7 +103,7 @@ applySettings();
 // ---------------------------------------------------------------------------
 
 const GRID=15;
-const mapMask=generateMapMask(GRID,GRID);
+const baseMapMask=generateMapMask(GRID,GRID);\nconst mapMask=baseMapMask.map(row=>row.slice());
 
 // --- Purchasable map expansion --------------------------------------------
 // The initial city occupies the generated central land mass. The four edge
@@ -128,9 +128,9 @@ for(const region of REGION_DEFS){
 let purchasedRegions=[];
 try{purchasedRegions=JSON.parse(localStorage.getItem(REGION_KEY)||'[]').filter(id=>REGION_DEFS.some(r=>r.id===id));}catch{}
 function saveRegions(){try{localStorage.setItem(REGION_KEY,JSON.stringify(purchasedRegions))}catch{}}
-function regionAtTile(x,y){return REGION_DEFS.find(r=>r.tiles.some(([tx,ty])=>tx===x&&ty===y))||null}
+function regionAtTile(x,y){if(baseMapMask[y]?.[x])return null;return REGION_DEFS.find(r=>r.tiles.some(([tx,ty])=>tx===x&&ty===y))||null}
 function isRegionPurchased(r){return purchasedRegions.includes(r.id)}
-function isUnlockedTile(x,y){return !!mapMask[y]?.[x]&&(!regionAtTile(x,y)||isRegionPurchased(regionAtTile(x,y)))}
+function isUnlockedTile(x,y){if(baseMapMask[y]?.[x])return true;const region=regionAtTile(x,y);return !!region&&isRegionPurchased(region)}
 function getUnlockedMask(){return mapMask.map((row,y)=>row.map((cell,x)=>cell&&isUnlockedTile(x,y)))}
 function showRegionPurchase(region){
  buildingPanel.innerHTML='<button class="building-close" type="button" aria-label="بستن">×</button><div class="building-panel-title">'+region.name+'</div><div class="building-panel-meta">این منطقه هنوز خریداری نشده است.</div><div class="building-panel-grid"><span>هزینه خرید</span><b>'+region.cost.toLocaleString('fa-IR')+' تومان</b><span class="building-effect">بعد از خرید، خانه‌های این منطقه برای ساخت‌وساز باز می‌شوند.</span></div><button class="upgrade-building" type="button" '+(state.money<region.cost?'disabled':'')+'>خرید منطقه · '+region.cost.toLocaleString('fa-IR')+' تومان</button>';
