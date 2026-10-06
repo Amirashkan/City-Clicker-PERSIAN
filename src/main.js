@@ -16,6 +16,7 @@ const constructionInfoToggle=document.querySelector('#construction-info-toggle')
 
 // --- User settings ---------------------------------------------------------
 const SETTINGS_KEY='city-clicker-settings';
+const SAVE_KEY='city-clicker-save-v1';
 const uiSettings={theme:'light',uiSize:'normal'};
 try{
   const saved=JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}');
@@ -97,6 +98,7 @@ document.querySelectorAll('[data-theme]').forEach(button=>{
 document.querySelectorAll('[data-ui-size]').forEach(button=>{
   button.addEventListener('click',()=>{uiSettings.uiSize=button.dataset.uiSize;applySettings()});
 });
+document.querySelector('#reset-game').addEventListener('click',resetGame);
 applySettings();
 // ---------------------------------------------------------------------------
 
@@ -132,7 +134,7 @@ function isUnlockedTile(x,y){return !!mapMask[y]?.[x]&&(!regionAtTile(x,y)||isRe
 function getUnlockedMask(){return mapMask.map((row,y)=>row.map((cell,x)=>cell&&isUnlockedTile(x,y)))}
 function showRegionPurchase(region){
  buildingPanel.innerHTML='<button class="building-close" type="button" aria-label="بستن">×</button><div class="building-panel-title">'+region.name+'</div><div class="building-panel-meta">این منطقه هنوز خریداری نشده است.</div><div class="building-panel-grid"><span>هزینه خرید</span><b>'+region.cost.toLocaleString('fa-IR')+' تومان</b><span class="building-effect">بعد از خرید، خانه‌های این منطقه برای ساخت‌وساز باز می‌شوند.</span></div><button class="upgrade-building" type="button" '+(state.money<region.cost?'disabled':'')+'>خرید منطقه · '+region.cost.toLocaleString('fa-IR')+' تومان</button>';
- buildingPanel.classList.add('visible');buildingPanel.querySelector('.building-close').onclick=()=>buildingPanel.classList.remove('visible');buildingPanel.querySelector('.upgrade-building').onclick=()=>{if(state.money>=region.cost){state.money-=region.cost;purchasedRegions.push(region.id);saveRegions();buildingPanel.classList.remove('visible');hint.textContent=region.name+' خریداری شد.';render()}};
+ buildingPanel.classList.add('visible');buildingPanel.querySelector('.building-close').onclick=()=>buildingPanel.classList.remove('visible');buildingPanel.querySelector('.upgrade-building').onclick=()=>{if(state.money>=region.cost){state.money-=region.cost;purchasedRegions.push(region.id);saveRegions();saveGame();buildingPanel.classList.remove('visible');hint.textContent=region.name+' خریداری شد.';render()}};
 }
 
 const state={
@@ -142,6 +144,11 @@ const state={
   panX:0,panY:0,pointer:null,effectRadiusBuilding:null,effectRadiusVisible:false
 };
 let iso;
+
+function saveGame(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({money:state.money,buildings:state.buildings,purchasedRegions,savedAt:Date.now()}))}catch{}}
+function loadGame(){try{const saved=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');if(!saved)return;if(Number.isFinite(saved.money))state.money=Math.max(0,saved.money);if(Array.isArray(saved.buildings)){state.buildings=saved.buildings.filter(b=>b&&BUILDINGS[b.type]&&Number.isInteger(b.x)&&Number.isInteger(b.y));state.buildings.forEach(b=>{b.level=Math.max(1,Math.min(3,Number(b.level)||1))})}if(Array.isArray(saved.purchasedRegions)){purchasedRegions=[...new Set(saved.purchasedRegions.filter(id=>REGION_DEFS.some(r=>r.id===id)))];saveRegions()}}catch{}}
+function resetGame(){if(!confirm('همه پیشرفت شهر، ساختمان‌ها و مناطق خریداری‌شده پاک شود؟'))return;localStorage.removeItem(SAVE_KEY);localStorage.removeItem(REGION_KEY);state.money=500;state.buildings=[];state.buildMode=false;state.selected='house';state.effectRadiusBuilding=null;state.effectRadiusVisible=false;purchasedRegions=[];refreshEconomy();constructionInfoToggle.classList.remove('visible');buildingPanel.classList.remove('visible');document.querySelectorAll('[data-building]').forEach(b=>b.classList.remove('active'));hint.textContent='شهر از نو شروع شد.';closeSettings();render();saveGame()}
+loadGame();
 
 function resize(){
   const dpr=Math.min(devicePixelRatio||1,2),r=canvas.getBoundingClientRect();
@@ -295,6 +302,7 @@ function showBuildingStatus(b){
       state.money-=freshCost;
       b.level=Math.min(3,(b.level||1)+1);
       refreshEconomy();
+      saveGame();
       hint.textContent=def.name+' به سطح '+b.level+' رسید.';
       showBuildingStatus(b);
       render();
@@ -303,6 +311,7 @@ function showBuildingStatus(b){
 }
 function manualClick(x,y){
   state.money+=state.economy.clickValue;
+  saveGame();
   showClickFeedback(x,y);
   render();
 }
@@ -379,6 +388,7 @@ canvas.addEventListener('pointerup',e=>{
   const building=createBuilding(state.selected,{x:tile.x,y:tile.y});
   state.buildings.push(building);
   refreshEconomy();
+  saveGame();
 
   // Construction is a one-shot action. Return immediately to the normal tap-to-earn state.
   state.buildMode=false;
@@ -456,9 +466,11 @@ canvas.addEventListener('pointercancel',endTouch);
 setInterval(()=>{
   refreshEconomy();
   state.money+=state.economy.autoClick;
+  saveGame();
   render();
 },1000);
 window.addEventListener('resize',resize);
+window.addEventListener('beforeunload',saveGame);
 refreshEconomy();
 resize();
 
