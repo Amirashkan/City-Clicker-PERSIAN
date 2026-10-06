@@ -1,16 +1,9 @@
 const PEOPLE_COUNT=12;
 const CARS_COUNT=6;
+let peopleSignature='';
 
 // Ambient paths live on tile boundaries/intersections rather than cutting through buildings.
 // Each route is a small, believable sidewalk/street corridor with an entrance and exit.
-const PEOPLE_ROUTES=[
-  [{x:-.5,y:2},{x:4,y:2},{x:4,y:6},{x:9,y:6},{x:9,y:10},{x:15.5,y:10}],
-  [{x:15.5,y:4},{x:11,y:4},{x:11,y:8},{x:6,y:8},{x:6,y:12},{x:-.5,y:12}],
-  [{x:2,y:-.5},{x:2,y:3},{x:5,y:3},{x:5,y:9},{x:12,y:9},{x:12,y:15.5}],
-  [{x:13,y:15.5},{x:13,y:11},{x:9,y:11},{x:9,y:5},{x:3,y:5},{x:3,y:-.5}],
-  [{x:-.5,y:7},{x:4,y:7},{x:4,y:2},{x:10,y:2},{x:10,y:7},{x:15.5,y:7}]
-];
-
 const CAR_ROUTES=[
   [{x:-.7,y:4.5},{x:5,y:4.5},{x:5,y:9.5},{x:15.7,y:9.5}],
   [{x:15.7,y:6.5},{x:10,y:6.5},{x:10,y:11.5},{x:-.7,y:11.5}],
@@ -39,6 +32,26 @@ function routePoint(route,t){
   return route[route.length-1];
 }
 
+function makePeopleFromBuildings(buildings){
+  const houses=buildings.filter(b=>b.type==='house');
+  const shops=buildings.filter(b=>b.type==='shop'||b.type==='bakery');
+  if(!houses.length||!shops.length)return [];
+
+  const routes=[];
+  for(let i=0;i<Math.min(PEOPLE_COUNT,houses.length*3);i++){
+    const h=houses[i%houses.length], s=shops[(i*3+1)%shops.length];
+    const start={x:h.x+.5,y:h.y+.5}, end={x:s.x+.5,y:s.y+.5};
+    const midX=end.x, midY=start.y;
+    // Keep the walk on grid-aligned corridors: leave the house, turn once, reach the shop.
+    routes.push([
+      {x:start.x,y:start.y},
+      {x:midX,y:midY},
+      {x:end.x,y:end.y}
+    ]);
+  }
+  return routes;
+}
+
 function makeActors(count,routes,speedMin,speedMax){
   return Array.from({length:count},(_,i)=>({
     route:routes[i%routes.length],
@@ -51,8 +64,23 @@ function makeActors(count,routes,speedMin,speedMax){
   }));
 }
 
-const people=makeActors(PEOPLE_COUNT,PEOPLE_ROUTES,.000018,.000030);
+let people=[];
 const cars=makeActors(CARS_COUNT,CAR_ROUTES,.000032,.000046);
+
+function syncPeople(buildings){
+  const routes=makePeopleFromBuildings(buildings);
+  const signature=routes.map(r=>r.map(p=>p.x+','+p.y).join('|')).join('||');
+  if(signature===peopleSignature)return;
+  peopleSignature=signature;
+  people=routes.map((route,i)=>({
+    route,t:0,
+    speed:.000030+(i%4)*.000004,
+    phase:i*1.73,
+    active:true,
+    wait:0,
+    type:i%3
+  }));
+}
 
 function advance(actor,dt){
   if(!actor.active){
@@ -105,7 +133,8 @@ function drawCar(ctx,iso,c){
 
 let lastTime=performance.now();
 
-export function drawAmbientLife(ctx,iso,now){
+export function drawAmbientLife(ctx,iso,now,buildings=[]){
+  syncPeople(buildings);
   const dt=Math.min(40,Math.max(0,now-lastTime));
   lastTime=now;
   for(const p of people){
