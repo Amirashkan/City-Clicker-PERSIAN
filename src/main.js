@@ -1,6 +1,6 @@
 import {IsoProjection} from './map/IsoProjection.js';
 import {BUILDINGS,createBuilding} from './buildings/registry.js';
-import {calculateEconomy} from './core/Rules.js';
+import {calculateEconomy,evaluateBuilding} from './core/Rules.js';
 import {drawBuilding} from './renderer/BuildingRenderer.js';
 import {drawGrid} from './renderer/GridRenderer.js';
 
@@ -85,21 +85,20 @@ function buildingAt(screenX,screenY){
   return null;
 }
 function showBuildingStatus(b){
-  const def=BUILDINGS[b.type]; let effects=[]; let penalty=0;
-  if(b.residential)effects.push('درآمد +'+b.residential+' در ثانیه');
-  if(b.urban)effects.push('درآمد شهری +'+b.urban+' در ثانیه');
-  if(b.click)effects.push('ارزش هر لمس +'+b.click);
-  if(b.production)effects.push('تولیدکننده');
-  if(b.type==='house'){
-    for(const producer of state.buildings){if(!producer.production)continue;const d=Math.max(Math.abs(b.x-producer.x),Math.abs(b.y-producer.y));if(d<=1)penalty+=1;else if(d===2)penalty+=.5;}
-    if(penalty)effects.push('کاهش فعلی درآمد: '+penalty);
-  }
-  const status=penalty?'تحت تأثیر تولید':'فعال';
+  const def=BUILDINGS[b.type];
+  const result=evaluateBuilding(b,state.buildings);
+  const effectLines=[...result.received,...result.provided];
+  const contribution=[];
+  if(result.autoClick)contribution.push('درآمد این ساختمان: +'+result.autoClick.toLocaleString('fa-IR',{maximumFractionDigits:2})+' در ثانیه');
+  if(result.clickValue)contribution.push('ارزش لمس از این ساختمان: +'+result.clickValue.toLocaleString('fa-IR',{maximumFractionDigits:2}));
+
   buildingPanel.innerHTML='<button class="building-close" type="button" aria-label="بستن">×</button>'+
     '<div class="building-panel-title">'+def.name+'</div>'+
-    '<div class="building-panel-meta">سطح '+(b.level||1)+' · وضعیت: '+status+'</div>'+
+    '<div class="building-panel-meta">سطح '+(b.level||1)+' · '+(result.autoClick||result.clickValue?'فعال':'بدون اثر فعلی')+'</div>'+
     '<div class="building-panel-grid"><span>هزینه ساخت</span><b>'+def.cost.toLocaleString('fa-IR')+' تومان</b>'+
-    effects.map(e=>'<span class="building-effect">'+e+'</span>').join('')+'</div>';
+    contribution.map(e=>'<span class="building-effect">'+e+'</span>').join('')+
+    effectLines.map(e=>'<span class="building-effect">'+e+'</span>').join('')+
+    '</div>';
   buildingPanel.classList.add('visible');
   buildingPanel.querySelector('.building-close').onclick=()=>buildingPanel.classList.remove('visible');
 }
