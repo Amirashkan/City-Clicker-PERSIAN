@@ -10,11 +10,11 @@ export function drawBuilding(ctx,iso,b,hover=false){
  const pal={house:['#bd8158','#a96d4c','#d9a06e'],shop:['#b69a68','#987d53','#d0b37b'],bakery:['#c99462','#a8754e','#e0b37f'],workshop:['#7f8983','#68716c','#9da79f']}[b.type]||['#bd8158','#a96d4c','#d9a06e'];
  ctx.save();
  if(hover){ctx.shadowColor='rgba(40,30,20,.22)';ctx.shadowBlur=7;ctx.shadowOffsetY=2}
- face(ctx,[baseL,baseB,{x:baseB.x,y:baseB.y},{x:baseL.x,y:baseL.y}],pal[0]);
- face(ctx,[baseR,baseB,{x:baseB.x,y:baseB.y},{x:baseR.x,y:baseR.y}],pal[1]);
+ face(ctx,[topL,topB,baseB,baseL],pal[0]);
+ face(ctx,[topR,baseR,baseB,topB],pal[1]);
  face(ctx,[top,topR,topB,topL],pal[2]);
  ctx.beginPath();ctx.moveTo(baseL.x,baseL.y);ctx.lineTo(baseB.x,baseB.y);ctx.lineTo(baseR.x,baseR.y);ctx.strokeStyle='#785d4b';ctx.lineWidth=1;ctx.stroke();
- drawWindows(ctx,{p,baseL,baseR,baseB,topL,topR},b.type,b.windows||2,b.upperFloor);
+ drawWindows(ctx,{p,baseL,baseR,baseB,topL,topR,topB,top},b.type,b.windows||2,b.upperFloor);
  if(b.type==='shop'||b.type==='bakery')drawSign(ctx,p.x,topY+hh*.65,b.type==='bakery'?'نان':'فروش',b.signStyle,hh);
  if(b.type==='house'&&b.tank)drawTank(ctx,p.x-hw*.28,topY-3);
  if(b.type==='house'&&b.antenna)drawAntenna(ctx,p.x+hw*.25,topY-2);
