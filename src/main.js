@@ -55,7 +55,7 @@ function choose(type){
 Object.keys(BUILDINGS).forEach(type=>{
   const def=BUILDINGS[type],button=document.createElement('button');
   button.dataset.building=type;
-  button.innerHTML=def.name+' <small>'+def.cost.toLocaleString('fa-IR')+'</small>';
+  button.innerHTML='<strong>'+def.name+'</strong><small>'+def.cost.toLocaleString('fa-IR')+' تومان</small><em>'+def.description+'</em>';
   button.type='button';
   button.addEventListener('click',()=>choose(type));
   tools.appendChild(button);
