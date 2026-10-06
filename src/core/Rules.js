@@ -1,5 +1,6 @@
 function distance(a,b){return Math.max(Math.abs(a.x-b.x),Math.abs(a.y-b.y))}
-function nearby(building,buildings,type,maxDistance=2){return buildings.filter(other=>other!==building&&(!type||other.type===type)&&distance(building,other)<=maxDistance)}
+const INFLUENCE_RADIUS=2;
+function nearby(building,buildings,type,maxDistance=2){return buildings.filter(other=>other!==building&&(!type||other.type===type)&&distance(building,other)<=INFLUENCE_RADIUS)}
 
 export function evaluateBuilding(building,buildings){
   let auto=0,click=0;
@@ -11,12 +12,12 @@ export function evaluateBuilding(building,buildings){
       const shops=nearby(building,buildings,'shop');
       const bakeries=nearby(building,buildings,'bakery');
       const parks=nearby(building,buildings,'park');
-      const producers=buildings.filter(b=>b.production&&distance(building,b)<=2);
+      const producers=buildings.filter(b=>b.production&&distance(building,b)<=INFLUENCE_RADIUS);
       if(shops.length){auto+=shops.length*.5;received.push('مغازه‌های اطراف: +'+shops.length*.5+' درآمد')}
       if(bakeries.length){auto+=bakeries.length*.75;received.push('نانوایی‌های اطراف: +'+bakeries.length*.75+' درآمد')}
       if(parks.length){auto+=parks.length*.5;received.push('پارک‌های اطراف: +'+parks.length*.5+' درآمد')}
       let penalty=0;
-      for(const p of producers){const d=distance(building,p);penalty+=d<=1?1:.5}
+      for(const p of producers){const d=distance(building,p);penalty+=d<=INFLUENCE_RADIUS?1:0}
       if(penalty){auto=Math.max(0,auto-penalty);received.push('آلودگی/مزاحمت تولید: -'+penalty+' درآمد')}
       break;
     }
