@@ -121,7 +121,8 @@ function showRegionPurchase(region){
  buildingPanel.innerHTML='<button class="building-close" type="button" aria-label="بستن">×</button><div class="building-panel-title">'+region.name+'</div><div class="building-panel-meta">این منطقه هنوز خریداری نشده است.</div><div class="building-panel-grid"><span>هزینه خرید</span><b>'+region.cost.toLocaleString('fa-IR')+' تومان</b><span class="building-effect">بعد از خرید، خانه‌های این منطقه برای ساخت‌وساز باز می‌شوند.</span></div><button class="upgrade-building" type="button" '+(state.money<region.cost?'disabled':'')+'>خرید منطقه · '+region.cost.toLocaleString('fa-IR')+' تومان</button>';
  buildingPanel.classList.add('visible');buildingPanel.querySelector('.building-close').onclick=()=>buildingPanel.classList.remove('visible');buildingPanel.querySelector('.upgrade-building').onclick=()=>{if(state.money>=region.cost){state.money-=region.cost;purchasedRegions.push(region.id);saveRegions();buildingPanel.classList.remove('visible');hint.textContent=region.name+' خریداری شد.';render()}};
 }
-\nconst state={
+
+const state={
   money:500,buildMode:false,selected:'house',hover:null,buildings:[],
   zoom:1,
   economy:{autoClick:0,clickValue:1},
@@ -336,7 +337,10 @@ canvas.addEventListener('pointerup',e=>{
   const tile=iso.tileAt(x,y);
 
   // A building always wins over build mode: tapping any part of its tile opens its status.
-  const region=regionAtTile(tile.x,tile.y);\n  if(region&&!isRegionPurchased(region)){showRegionPurchase(region);return;}\n\n  const clickedBuilding=buildingAt(x,y)||buildingAtTile(tile.x,tile.y);
+  const region=regionAtTile(tile.x,tile.y);
+  if(region&&!isRegionPurchased(region)){showRegionPurchase(region);return;}
+
+  const clickedBuilding=buildingAt(x,y)||buildingAtTile(tile.x,tile.y);
   if(clickedBuilding){
     showBuildingStatus(clickedBuilding);
     return;
