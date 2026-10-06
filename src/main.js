@@ -1,9 +1,9 @@
-import {IsoProjection} from './map/IsoProjection.js';
-import {BUILDINGS,createBuilding} from './buildings/registry.js';
-import {calculateEconomy,evaluateBuilding} from './core/Rules.js';
-import {drawBuilding} from './renderer/BuildingRenderer.js';
-import {drawGrid} from './renderer/GridRenderer.js';
-import {drawAmbientLife} from './renderer/AmbientLife.js';
+import{IsoProjection}from'./map/IsoProjection.js';
+import{BUILDINGS,createBuilding,getUpgradeCost}from'./buildings/registry.js';
+import{calculateEconomy,evaluateBuilding,getLevelStats}from'./core/Rules.js';
+import{drawBuilding}from'./renderer/BuildingRenderer.js';
+import{drawGrid}from'./renderer/GridRenderer.js';
+import{drawAmbientLife}from'./renderer/AmbientLife.js';
 
 const canvas=document.querySelector('#city'),ctx=canvas.getContext('2d');
 const moneyEl=document.querySelector('#money'),incomeEl=document.querySelector('#income'),clickEl=document.querySelector('#click-value');
@@ -81,7 +81,7 @@ function buildingAt(screenX,screenY){
   // another tile from selecting the neighboring house underneath it.
   for(const b of ordered){
     const p=iso.worldToScreen(b.x+.5,b.y+.5);
-    const tw=iso.tileWidth,th=iso.tileHeight,h=b.h||34;
+    const tw=iso.tileWidth,th=iso.tileHeight,h=(b.h||34)+(Math.max(1,b.level||1)-1)*7;
     const halfW=(b.w||.78)*tw*.72;
     const halfH=(b.d||.78)*th*.85;
     if(b.type==='park'){
@@ -102,20 +102,42 @@ function buildingAt(screenX,screenY){
 function showBuildingStatus(b){
   const def=BUILDINGS[b.type];
   const result=evaluateBuilding(b,state.buildings);
+  const level=b.level||1;
+  const stats=getLevelStats(level);
   const effectLines=[...result.received,...result.provided];
   const contribution=[];
   if(result.autoClick)contribution.push('درآمد این ساختمان: +'+result.autoClick.toLocaleString('fa-IR',{maximumFractionDigits:2})+' در ثانیه');
   if(result.clickValue)contribution.push('ارزش لمس از این ساختمان: +'+result.clickValue.toLocaleString('fa-IR',{maximumFractionDigits:2}));
 
+  const upgradeCost=getUpgradeCost(b.type,level);
+  const upgradeMarkup=upgradeCost
+    ? '<button class="upgrade-building" type="button" '+(state.money<upgradeCost?'disabled':'')+'>ارتقا به سطح '+(level+1)+' · '+upgradeCost.toLocaleString('fa-IR')+' تومان</button>'
+    : '<div class="building-maxed">این ساختمان به حداکثر سطح رسیده است.</div>';
+
   buildingPanel.innerHTML='<button class="building-close" type="button" aria-label="بستن">×</button>'+
     '<div class="building-panel-title">'+def.name+'</div>'+
-    '<div class="building-panel-meta">سطح '+(b.level||1)+' · '+(result.autoClick||result.clickValue?'فعال':'بدون اثر فعلی')+'</div>'+
+    '<div class="building-panel-meta">سطح '+level+' · شعاع اثر '+stats.radius+' خانه · قدرت اثر ×'+stats.multiplier+'</div>'+
     '<div class="building-panel-grid"><span>هزینه ساخت</span><b>'+def.cost.toLocaleString('fa-IR')+' تومان</b>'+
     contribution.map(e=>'<span class="building-effect">'+e+'</span>').join('')+
     effectLines.map(e=>'<span class="building-effect">'+e+'</span>').join('')+
-    '</div>';
+    '</div>'+
+    '<div class="upgrade-wrap">'+upgradeMarkup+'</div>';
+
   buildingPanel.classList.add('visible');
   buildingPanel.querySelector('.building-close').onclick=()=>buildingPanel.classList.remove('visible');
+  const upgradeButton=buildingPanel.querySelector('.upgrade-building');
+  if(upgradeButton){
+    upgradeButton.onclick=()=>{
+      const freshCost=getUpgradeCost(b.type,b.level||1);
+      if(!freshCost||state.money<freshCost)return;
+      state.money-=freshCost;
+      b.level=Math.min(3,(b.level||1)+1);
+      refreshEconomy();
+      hint.textContent=def.name+' به سطح '+b.level+' رسید.';
+      showBuildingStatus(b);
+      render();
+    };
+  }
 }
 function manualClick(x,y){
   state.money+=state.economy.clickValue;
