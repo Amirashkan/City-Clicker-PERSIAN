@@ -14,7 +14,10 @@
       <span>City Clicker</span>
     </div>
 
-    <button id="settings-button" class="settings-button" type="button" aria-label="تنظیمات">⚙</button>
+    <div class="topbar-actions">
+      <button id="city-status-button" class="settings-button" type="button" aria-label="وضعیت شهر">▤</button>
+      <button id="settings-button" class="settings-button" type="button" aria-label="تنظیمات">⚙</button>
+    </div>
     <div class="hud">
       <div class="money-stat">
         <b id="money">۵۰۰</b>
@@ -31,6 +34,40 @@
       </div>
     </div>
   </header>
+
+  <div id="city-status-panel" class="settings-panel" aria-hidden="true">
+    <div class="settings-card city-status-card">
+      <button id="city-status-close" class="settings-close" type="button" aria-label="بستن">×</button>
+      <div class="settings-title">وضعیت شهر</div>
+      <div class="city-status-primary">
+        <div><span>موجودی</span><b id="city-status-money">۰</b></div>
+        <div><span>درآمد / ثانیه</span><b id="city-status-income">۰</b></div>
+        <div><span>هر لمس</span><b id="city-status-click">۱</b></div>
+      </div>
+      <div class="city-status-section">
+        <div class="settings-label">ساختار شهر</div>
+        <div class="city-status-grid">
+          <div><span>کل ساختمان‌ها</span><b id="city-status-total">۰</b></div>
+          <div><span>خانه</span><b id="city-status-houses">۰</b></div>
+          <div><span>مغازه</span><b id="city-status-shops">۰</b></div>
+          <div><span>نانوایی</span><b id="city-status-bakeries">۰</b></div>
+          <div><span>پارک</span><b id="city-status-parks">۰</b></div>
+          <div><span>کارگاه</span><b id="city-status-workshops">۰</b></div>
+          <div><span>مزرعه</span><b id="city-status-farms">۰</b></div>
+          <div><span>زمین اشغال‌شده</span><b id="city-status-land">۰٪</b></div>
+        </div>
+      </div>
+      <div class="city-status-section">
+        <div class="settings-label">توسعه</div>
+        <div class="city-status-grid">
+          <div><span>میانگین سطح ارتقا</span><b id="city-status-level">۱</b></div>
+          <div><span>ساختمان‌های سطح ۳</span><b id="city-status-maxed">۰</b></div>
+          <div><span>قدرت اثر فعال</span><b id="city-status-influence">۰</b></div>
+          <div><span>شعاع اثر فعال</span><b id="city-status-radius">۰</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div id="settings-panel" class="settings-panel" aria-hidden="true">
     <div class="settings-card">
