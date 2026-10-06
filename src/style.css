@@ -368,3 +368,4 @@ canvas{
   color:#24221e;
   opacity:.8;
 }
+.effect-radius-wrap{margin-top:10px}.effect-radius-toggle{width:100%;min-height:34px;border:1px solid #aebaa9;border-radius:9px;background:#eef3ed;color:#3f6349;font:inherit;font-size:10px;padding:6px 9px;cursor:pointer}.effect-radius-toggle.active{background:#3f6349;color:#fff;border-color:#3f6349}:root.dark .effect-radius-toggle{background:#30382f;border-color:#596b58;color:#cbd9c8}:root.dark .effect-radius-toggle.active{background:#cbd9c8;color:#263025;border-color:#cbd9c8}
