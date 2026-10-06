@@ -359,3 +359,15 @@ canvas{
 :root.dark .building-panel-meta,
 :root.dark #cancel-build{color:var(--muted)}
 .topbar,.hint,.build-dock,#building-panel,#click-feedback{zoom:var(--ui-scale)}
+
+
+:root.dark #building-tools button.active{
+  background:#eee9df;
+  color:#24221e;
+  border-color:#eee9df;
+}
+:root.dark #building-tools button.active small,
+:root.dark #building-tools button.active em{
+  color:#24221e;
+  opacity:.8;
+}
