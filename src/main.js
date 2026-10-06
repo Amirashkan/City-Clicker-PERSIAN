@@ -9,6 +9,44 @@ const canvas=document.querySelector('#city'),ctx=canvas.getContext('2d');
 const moneyEl=document.querySelector('#money'),incomeEl=document.querySelector('#income'),clickEl=document.querySelector('#click-value');
 const hint=document.querySelector('#hint'),tools=document.querySelector('#building-tools'),feedback=document.querySelector('#click-feedback');
 const buildingPanel=document.querySelector('#building-panel');
+
+// --- User settings ---------------------------------------------------------
+const SETTINGS_KEY='city-clicker-settings';
+const uiSettings={theme:'light',uiSize:'normal'};
+try{
+  const saved=JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}');
+  if(saved.theme==='dark'||saved.theme==='light')uiSettings.theme=saved.theme;
+  if(['small','normal','large'].includes(saved.uiSize))uiSettings.uiSize=saved.uiSize;
+}catch{}
+
+function applySettings(){
+  document.documentElement.classList.toggle('dark',uiSettings.theme==='dark');
+  const scales={small:.88,normal:1,large:1.14};
+  document.documentElement.style.setProperty('--ui-scale',scales[uiSettings.uiSize]);
+  document.querySelectorAll('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme===uiSettings.theme));
+  document.querySelectorAll('[data-ui-size]').forEach(b=>b.classList.toggle('active',b.dataset.uiSize===uiSettings.uiSize));
+  try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(uiSettings))}catch{}
+}
+const settingsPanel=document.querySelector('#settings-panel');
+document.querySelector('#settings-button').addEventListener('click',()=>{
+  settingsPanel.classList.add('visible');
+  settingsPanel.setAttribute('aria-hidden','false');
+});
+function closeSettings(){
+  settingsPanel.classList.remove('visible');
+  settingsPanel.setAttribute('aria-hidden','true');
+}
+document.querySelector('#settings-close').addEventListener('click',closeSettings);
+settingsPanel.addEventListener('click',e=>{if(e.target===settingsPanel)closeSettings()});
+document.querySelectorAll('[data-theme]').forEach(button=>{
+  button.addEventListener('click',()=>{uiSettings.theme=button.dataset.theme;applySettings()});
+});
+document.querySelectorAll('[data-ui-size]').forEach(button=>{
+  button.addEventListener('click',()=>{uiSettings.uiSize=button.dataset.uiSize;applySettings()});
+});
+applySettings();
+// ---------------------------------------------------------------------------
+
 const GRID=15;
 const state={
   money:500,buildMode:false,selected:'house',hover:null,buildings:[],
