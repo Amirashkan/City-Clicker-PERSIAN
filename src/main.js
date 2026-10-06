@@ -103,7 +103,8 @@ applySettings();
 // ---------------------------------------------------------------------------
 
 const GRID=15;
-const baseMapMask=generateMapMask(GRID,GRID);\nconst mapMask=baseMapMask.map(row=>row.slice());
+const baseMapMask=generateMapMask(GRID,GRID);
+const mapMask=baseMapMask.map(row=>row.slice());
 
 // --- Purchasable map expansion --------------------------------------------
 // The initial city occupies the generated central land mass. The four edge
