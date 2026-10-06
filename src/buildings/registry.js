@@ -5,12 +5,12 @@ function simpleGenerator({x,y,seed=.42}){
 }
 
 export const BUILDINGS={
-  house:{type:'house',name:'خانه',cost:100,description:'درآمد پایه؛ از مغازه، نانوایی و پارک اطراف سود می‌گیرد؛ تولید مزاحم درآمدش را کم می‌کند.',generate:generateHouse,economy:{residential:1}},
-  shop:{type:'shop',name:'مغازه',cost:220,description:'درآمد می‌دهد و از خانه‌های اطراف مشتری می‌گیرد.',generate:simpleGenerator,economy:{urban:2}},
-  bakery:{type:'bakery',name:'نانوایی',cost:350,description:'درآمد می‌دهد؛ از خانه و مغازه اطراف سود می‌گیرد و از مزرعه پشتیبانی می‌کند.',generate:simpleGenerator,economy:{urban:3}},
-  park:{type:'park',name:'پارک',cost:180,description:'درآمد و ارزش هر کلیک را بالا می‌برد و به خانه‌های اطراف رفاه می‌دهد.',generate:simpleGenerator,economy:{urban:1,click:1}},
-  workshop:{type:'workshop',name:'کارگاه',cost:450,description:'ارزش هر کلیک را بالا می‌برد و با مزرعه‌های اطراف همکاری می‌کند.',generate:simpleGenerator,economy:{click:3,production:true}},
-  farm:{type:'farm',name:'باغ/مزرعه',cost:300,description:'ارزش هر کلیک را بالا می‌برد و با کارگاه و نانوایی اطراف همکاری می‌کند.',generate:simpleGenerator,economy:{click:2,production:true}}
+  house:{type:'house',name:'خانه',cost:100,generate:generateHouse,economy:{residential:1}},
+  shop:{type:'shop',name:'مغازه',cost:220,generate:simpleGenerator,economy:{urban:2}},
+  bakery:{type:'bakery',name:'نانوایی',cost:350,generate:simpleGenerator,economy:{urban:3}},
+  park:{type:'park',name:'پارک',cost:180,generate:simpleGenerator,economy:{urban:1,click:1}},
+  workshop:{type:'workshop',name:'کارگاه',cost:450,generate:simpleGenerator,economy:{click:3,production:true}},
+  farm:{type:'farm',name:'باغ/مزرعه',cost:300,generate:simpleGenerator,economy:{click:2,production:true}}
 };
 
 const UPGRADE_FACTORS=[.75,1.5];
