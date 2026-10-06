@@ -12,6 +12,7 @@ const buildingPanel=document.querySelector('#building-panel');
 const GRID=15;
 const state={
   money:500,buildMode:false,selected:'house',hover:null,buildings:[],
+  zoom:1,
   economy:{autoClick:0,clickValue:1},
   panX:0,panY:0,pointer:null
 };
@@ -24,7 +25,7 @@ function resize(){
   const tileWidth=Math.max(34,Math.min(54,r.width/8.2));
   const tileHeight=tileWidth/2;
   iso=new IsoProjection({
-    tileWidth,tileHeight,
+    tileWidth:tileWidth*state.zoom,tileHeight,
     originX:r.width/2+state.panX,
     originY:Math.max(55,r.height*.20)+state.panY
   });
@@ -191,6 +192,38 @@ canvas.addEventListener('pointerup',e=>{
   render();
 });
 canvas.addEventListener('pointercancel',()=>{state.pointer=null});
+
+let pinch=null;
+canvas.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='touch'){
+    const pts=[...canvas.setPointerCapture?[]:[]];
+  }
+});
+const touches=new Map();
+canvas.addEventListener('pointerdown',e=>{
+  if(e.pointerType!=='touch')return;
+  touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(touches.size===2){
+    const p=[...touches.values()];
+    pinch={distance:Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y),zoom:state.zoom};
+  }
+});
+canvas.addEventListener('pointermove',e=>{
+  if(e.pointerType!=='touch'||!touches.has(e.pointerId)||!pinch)return;
+  touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  const p=[...touches.values()];
+  if(p.length!==2)return;
+  const d=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);
+  state.zoom=Math.max(.65,Math.min(1.8,pinch.zoom*d/pinch.distance));
+  resize();
+});
+function endTouch(e){
+  if(e.pointerType!=='touch')return;
+  touches.delete(e.pointerId);
+  if(touches.size<2)pinch=null;
+}
+canvas.addEventListener('pointerup',endTouch);
+canvas.addEventListener('pointercancel',endTouch);
 setInterval(()=>{
   refreshEconomy();
   state.money+=state.economy.autoClick;
