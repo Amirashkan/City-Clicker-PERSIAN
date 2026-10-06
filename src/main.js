@@ -3,6 +3,7 @@ import {BUILDINGS,createBuilding} from './buildings/registry.js';
 import {calculateEconomy,evaluateBuilding} from './core/Rules.js';
 import {drawBuilding} from './renderer/BuildingRenderer.js';
 import {drawGrid} from './renderer/GridRenderer.js';
+import {drawAmbientLife} from './renderer/AmbientLife.js';
 
 const canvas=document.querySelector('#city'),ctx=canvas.getContext('2d');
 const moneyEl=document.querySelector('#money'),incomeEl=document.querySelector('#income'),clickEl=document.querySelector('#click-value');
@@ -37,6 +38,7 @@ function render(){
   const r=canvas.getBoundingClientRect();
   ctx.clearRect(0,0,r.width,r.height);
   drawGrid(ctx,iso,GRID,GRID,state.hover);
+  drawAmbientLife(ctx,iso,performance.now());
   [...state.buildings].sort((a,b)=>(a.x+a.y)-(b.x+b.y))
     .forEach(b=>drawBuilding(ctx,iso,b,state.hover?.x===b.x&&state.hover?.y===b.y));
   moneyEl.textContent=Math.floor(state.money).toLocaleString('fa-IR');
@@ -197,3 +199,10 @@ setInterval(()=>{
 window.addEventListener('resize',resize);
 refreshEconomy();
 resize();
+
+// Ambient life is purely visual: it never touches economy, building rules or input.
+function animate(){
+  render();
+  requestAnimationFrame(animate);
+}
+animate();
