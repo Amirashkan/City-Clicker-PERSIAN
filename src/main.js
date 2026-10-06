@@ -7,6 +7,7 @@ import {drawGrid} from './renderer/GridRenderer.js';
 const canvas=document.querySelector('#city'),ctx=canvas.getContext('2d');
 const moneyEl=document.querySelector('#money'),incomeEl=document.querySelector('#income'),clickEl=document.querySelector('#click-value');
 const hint=document.querySelector('#hint'),tools=document.querySelector('#building-tools'),feedback=document.querySelector('#click-feedback');
+const buildingPanel=document.querySelector('#building-panel');
 const GRID=15;
 const state={
   money:500,buildMode:false,selected:'house',hover:null,buildings:[],
@@ -61,6 +62,36 @@ function showClickFeedback(x,y){
   pop.style.left=x+'px';pop.style.top=y+'px';
   feedback.appendChild(pop);
   setTimeout(()=>pop.remove(),700);
+}
+function buildingAt(screenX,screenY){
+  for(const b of [...state.buildings].sort((a,b)=>(b.x+b.y)-(a.x+a.y))){
+    const p=iso.worldToScreen(b.x+.5,b.y+.5),tw=iso.tileWidth,th=iso.tileHeight;
+    const w=(b.w||.78)*tw,d=(b.d||.78)*th,h=b.h||34;
+    const dx=Math.abs(screenX-p.x),dy=screenY-p.y;
+    if(b.type==='park'){if(dx<=tw*.42&&dy>=-30&&dy<=th*.55)return b;}
+    else if(b.type==='farm'){if(dx<=tw*.42&&dy>=-4&&dy<=th*1.05)return b;}
+    else if(dx<=w*.72&&dy>=-h-d*.8&&dy<=th*.7)return b;
+  }
+  return null;
+}
+function showBuildingStatus(b){
+  const def=BUILDINGS[b.type]; let effects=[]; let penalty=0;
+  if(b.residential)effects.push('درآمد +'+b.residential+' در ثانیه');
+  if(b.urban)effects.push('درآمد شهری +'+b.urban+' در ثانیه');
+  if(b.click)effects.push('ارزش هر لمس +'+b.click);
+  if(b.production)effects.push('تولیدکننده');
+  if(b.type==='house'){
+    for(const producer of state.buildings){if(!producer.production)continue;const d=Math.max(Math.abs(b.x-producer.x),Math.abs(b.y-producer.y));if(d<=1)penalty+=1;else if(d===2)penalty+=.5;}
+    if(penalty)effects.push('کاهش فعلی درآمد: '+penalty);
+  }
+  const status=penalty?'تحت تأثیر تولید':'فعال';
+  buildingPanel.innerHTML='<button class="building-close" type="button" aria-label="بستن">×</button>'+
+    '<div class="building-panel-title">'+def.name+'</div>'+
+    '<div class="building-panel-meta">سطح '+(b.level||1)+' · وضعیت: '+status+'</div>'+
+    '<div class="building-panel-grid"><span>هزینه ساخت</span><b>'+def.cost.toLocaleString('fa-IR')+' تومان</b>'+
+    effects.map(e=>'<span class="building-effect">'+e+'</span>').join('')+'</div>';
+  buildingPanel.classList.add('visible');
+  buildingPanel.querySelector('.building-close').onclick=()=>buildingPanel.classList.remove('visible');
 }
 function manualClick(x,y){
   state.money+=state.economy.clickValue;
