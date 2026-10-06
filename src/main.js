@@ -102,14 +102,27 @@ applySettings();
 
 const GRID=15;
 const mapMask=generateMapMask(GRID,GRID);
-// --- Purchasable map regions ----------------------------------------------
+
+// --- Purchasable map expansion --------------------------------------------
+// The initial city occupies the generated central land mass. The four edge
+// chunks are deliberately part of the map mask, but remain locked until the
+// player buys them. This makes expansion visible and keeps each purchase as
+// a real extension of the buildable city rather than merely a cosmetic flag.
 const REGION_KEY='city-clicker-regions';
 const REGION_DEFS=[
-{id:'north',name:'منطقه شمالی',cost:2500,tiles:[[6,0],[7,0],[8,0],[6,1],[7,1],[8,1]]},
-{id:'east',name:'منطقه شرقی',cost:5000,tiles:[[13,6],[14,6],[13,7],[14,7],[13,8],[14,8]]},
-{id:'south',name:'منطقه جنوبی',cost:8500,tiles:[[6,13],[7,13],[8,13],[6,14],[7,14],[8,14]]},
-{id:'west',name:'منطقه غربی',cost:12000,tiles:[[0,6],[1,6],[0,7],[1,7],[0,8],[1,8]]}
+  {id:'north',name:'منطقه شمالی',cost:2500,tiles:[[6,0],[7,0],[8,0],[5,1],[6,1],[7,1],[8,1],[9,1],[5,2],[6,2],[7,2],[8,2],[9,2]]},
+  {id:'east',name:'منطقه شرقی',cost:5000,tiles:[[12,5],[13,5],[14,5],[12,6],[13,6],[14,6],[12,7],[13,7],[14,7],[12,8],[13,8],[14,8],[12,9],[13,9],[14,9]]},
+  {id:'south',name:'منطقه جنوبی',cost:8500,tiles:[[5,12],[6,12],[7,12],[8,12],[9,12],[5,13],[6,13],[7,13],[8,13],[9,13],[6,14],[7,14],[8,14]]},
+  {id:'west',name:'منطقه غربی',cost:12000,tiles:[[0,6],[1,6],[2,6],[0,7],[1,7],[2,7],[0,8],[1,8],[2,8],[0,9],[1,9],[2,9],[0,5],[1,5],[2,5]]}
 ];
+
+// Expansion tiles are rendered as locked land even when the generated
+// organic mask would otherwise exclude them.
+for(const region of REGION_DEFS){
+  for(const [x,y] of region.tiles){
+    if(mapMask[y]&&x>=0&&x<GRID) mapMask[y][x]=true;
+  }
+}
 let purchasedRegions=[];
 try{purchasedRegions=JSON.parse(localStorage.getItem(REGION_KEY)||'[]').filter(id=>REGION_DEFS.some(r=>r.id===id));}catch{}
 function saveRegions(){try{localStorage.setItem(REGION_KEY,JSON.stringify(purchasedRegions))}catch{}}
