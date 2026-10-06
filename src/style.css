@@ -129,8 +129,7 @@ canvas{
   justify-content:center;
   gap:3px;
   touch-action:manipulation;
-}
-#building-tools button strong{font-size:11px;font-weight:600}\n#building-tools button small{font-size:9px;opacity:.65}\n#building-tools button em{font-style:normal;font-size:8px;line-height:1.25;opacity:.9;white-space:nowrap;display:block}\n#building-tools button .effect-good{color:#3f7a4c;font-weight:600}\n#building-tools button .effect-bad{color:#a24b43;font-weight:600}\n#building-tools button.active em{opacity:.95}
+}\n#building-tools button small{font-size:9px;opacity:.65}\n#building-tools button em{font-style:normal;font-size:8px;line-height:1.25;opacity:.9;white-space:nowrap;display:block}\n#building-tools button .effect-good{color:#3f7a4c;font-weight:600}\n#building-tools button .effect-bad{color:#a24b43;font-weight:600}\n#building-tools button.active em{opacity:.95}
 #building-tools button.active{
   background:#34302a;
   color:#fff;
