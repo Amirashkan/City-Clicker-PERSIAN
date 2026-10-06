@@ -31,7 +31,7 @@ function drawWindows(c,p,hw,y,type){
 }
 function drawSign(c,x,y,text){
  c.fillStyle='#ead9ad';c.fillRect(x-16,y-6,32,12);
- c.fillStyle='#493d2f';c.font='8px Tahoma';c.textAlign='center';c.fillText(text,x,y+3);
+ c.fillStyle='#493d2f';c.font='8px Vazirmatn';c.textAlign='center';c.fillText(text,x,y+3);
 }
 function drawTank(c,x,y){
  c.fillStyle='#587875';c.beginPath();c.ellipse(x,y-5,6,2.5,0,0,Math.PI*2);c.fill();c.fillRect(x-6,y-5,12,6);
@@ -43,7 +43,7 @@ function drawLevelBadge(c,x,y,level){
  if(level<2)return;
  c.fillStyle='rgba(247,241,231,.92)';
  c.beginPath();c.arc(x,y,8,0,Math.PI*2);c.fill();
- c.fillStyle='#5d5144';c.font='bold 9px Tahoma';c.textAlign='center';c.textBaseline='middle';
+ c.fillStyle='#5d5144';c.font='bold 9px Vazirmatn';c.textAlign='center';c.textBaseline='middle';
  c.fillText(String(level),x,y+.5);
  c.textBaseline='alphabetic';
 }
