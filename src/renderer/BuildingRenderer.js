@@ -38,9 +38,9 @@ function drawWorkshop(c,x,y){
 }
 function drawPark(c,iso,b,hover){
  const p=iso.worldToScreen(b.x+.5,b.y+.5),tw=iso.tileWidth,th=iso.tileHeight;
- c=ctx;c.save();c.fillStyle=hover?'#a5b57f':'#91a16e';
- c.beginPath();c.moveTo(p.x,p.y-9);c.lineTo(p.x+tw*.38,p.y+th*.12);c.lineTo(p.x,p.y+th*.44);c.lineTo(p.x-tw*.38,p.y+th*.12);c.closePath();c.fill();
- c.fillStyle='#6d7f55';c.fillRect(p.x-2,p.y-16,4,16);c.beginPath();c.arc(p.x,p.y-21,8,0,Math.PI*2);c.fill();c.restore();
+ ctx.save();ctx.fillStyle=hover?'#a5b57f':'#91a16e';
+ ctx.beginPath();ctx.moveTo(p.x,p.y-9);ctx.lineTo(p.x+tw*.38,p.y+th*.12);ctx.lineTo(p.x,p.y+th*.44);ctx.lineTo(p.x-tw*.38,p.y+th*.12);ctx.closePath();ctx.fill();
+ ctx.fillStyle='#6d7f55';ctx.fillRect(p.x-2,p.y-16,4,16);ctx.beginPath();ctx.arc(p.x,p.y-21,8,0,Math.PI*2);ctx.fill();ctx.restore();
 }
 function drawFarm(ctx,iso,b,hover){
  const p=iso.worldToScreen(b.x+.5,b.y+.5),tw=iso.tileWidth,th=iso.tileHeight;
