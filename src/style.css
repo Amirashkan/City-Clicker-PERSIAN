@@ -378,3 +378,5 @@ canvas{
 .city-status-section{margin-top:16px}
 .city-status-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
 .city-status-grid b{font-size:11px}
+
+.settings-danger{margin-top:18px}.reset-game-button{width:100%;padding:10px 12px;border:1px solid rgba(170,60,60,.35);border-radius:10px;background:transparent;color:#a33;font:inherit;cursor:pointer}.reset-game-button:active{transform:scale(.98)}
