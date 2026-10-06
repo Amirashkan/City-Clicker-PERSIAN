@@ -64,7 +64,9 @@ function showConstructionInfo(type){
     farm:[['+2 لمس','good'],['+0.75 لمس به ازای هر قدرت کارگاه اطراف','good'],['+0.5 لمس به ازای هر قدرت نانوایی اطراف','good']]
   }[type]||[];
   buildingPanel.innerHTML='<button class="building-close" type="button" aria-label="بستن">×</button>'+
-    '<div class="building-panel-title">'+def.name+'</div>'+\n    '<div class="building-panel-meta">هزینه ساخت · '+def.cost.toLocaleString('fa-IR')+' تومان</div>'+\n    '<div class="construction-effects">'+effects.map(([text,kind])=>'<div class="construction-effect '+kind+'">'+text+'</div>').join('')+'</div>';
+    '<div class="building-panel-title">'+def.name+'</div>'+
+    '<div class="building-panel-meta">هزینه ساخت · '+def.cost.toLocaleString('fa-IR')+' تومان</div>'+
+    '<div class="construction-effects">'+effects.map(([text,kind])=>'<div class="construction-effect '+kind+'">'+text+'</div>').join('')+'</div>';
   buildingPanel.classList.add('visible','construction-info');
   buildingPanel.querySelector('.building-close').onclick=()=>buildingPanel.classList.remove('visible');
 }
