@@ -90,7 +90,7 @@ function choose(type){
   state.selected=type;state.buildMode=true;
   document.querySelectorAll('[data-building]').forEach(b=>b.classList.toggle('active',b.dataset.building===type));
   constructionInfoToggle.classList.add('visible');
-  showConstructionInfo(type);
+  buildingPanel.classList.remove('visible');
   hint.textContent=BUILDINGS[type].name+' را روی یک خانه خالی بگذار.';
 }
 function showConstructionInfo(type){
