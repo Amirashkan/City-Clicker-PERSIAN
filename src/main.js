@@ -89,8 +89,8 @@ function render(){
 function choose(type){
   state.selected=type;state.buildMode=true;
   document.querySelectorAll('[data-building]').forEach(b=>b.classList.toggle('active',b.dataset.building===type));
-  buildingPanel.classList.remove('visible');
   constructionInfoToggle.classList.add('visible');
+  showConstructionInfo(type);
   hint.textContent=BUILDINGS[type].name+' را روی یک خانه خالی بگذار.';
 }
 function showConstructionInfo(type){
@@ -107,7 +107,7 @@ function showConstructionInfo(type){
     '<div class="building-panel-title">'+def.name+'</div>'+
     '<div class="building-panel-meta">اثر پایه و تمام اثرهای اطراف</div>'+
     '<div class="construction-effects">'+effects.map(([text,kind])=>'<div class="construction-effect '+kind+'">'+text+'</div>').join('')+'</div>';
-  buildingPanel.classList.add('construction-info');
+  buildingPanel.classList.add('construction-info','visible');
   buildingPanel.querySelector('.building-close').onclick=()=>buildingPanel.classList.remove('visible');
 }
 Object.keys(BUILDINGS).forEach(type=>{
