@@ -9,6 +9,7 @@ const canvas=document.querySelector('#city'),ctx=canvas.getContext('2d');
 const moneyEl=document.querySelector('#money'),incomeEl=document.querySelector('#income'),clickEl=document.querySelector('#click-value');
 const hint=document.querySelector('#hint'),tools=document.querySelector('#building-tools'),feedback=document.querySelector('#click-feedback');
 const buildingPanel=document.querySelector('#building-panel');
+const constructionInfoToggle=document.querySelector('#construction-info-toggle');
 
 // --- User settings ---------------------------------------------------------
 const SETTINGS_KEY='city-clicker-settings';
@@ -88,7 +89,8 @@ function render(){
 function choose(type){
   state.selected=type;state.buildMode=true;
   document.querySelectorAll('[data-building]').forEach(b=>b.classList.toggle('active',b.dataset.building===type));
-  showConstructionInfo(type);
+  buildingPanel.classList.remove('visible');
+  constructionInfoToggle.classList.add('visible');
   hint.textContent=BUILDINGS[type].name+' را روی یک خانه خالی بگذار.';
 }
 function showConstructionInfo(type){
@@ -105,7 +107,7 @@ function showConstructionInfo(type){
     '<div class="building-panel-title">'+def.name+'</div>'+
     '<div class="building-panel-meta">اثر پایه و تمام اثرهای اطراف</div>'+
     '<div class="construction-effects">'+effects.map(([text,kind])=>'<div class="construction-effect '+kind+'">'+text+'</div>').join('')+'</div>';
-  buildingPanel.classList.add('visible','construction-info');
+  buildingPanel.classList.add('construction-info');
   buildingPanel.querySelector('.building-close').onclick=()=>buildingPanel.classList.remove('visible');
 }
 Object.keys(BUILDINGS).forEach(type=>{
@@ -202,10 +204,17 @@ function manualClick(x,y){
 }
 function cancelBuild(){
   state.buildMode=false;
+  constructionInfoToggle.classList.remove('visible');
+  buildingPanel.classList.remove('visible');
   document.querySelectorAll('[data-building]').forEach(b=>b.classList.remove('active'));
   hint.textContent='برای درآمد روی شهر بزن.';
 }
 document.querySelector('#cancel-build').addEventListener('click',cancelBuild);
+constructionInfoToggle.addEventListener('click',()=>{
+  if(!state.buildMode)return;
+  if(buildingPanel.classList.contains('visible')) buildingPanel.classList.remove('visible');
+  else showConstructionInfo(state.selected);
+});
 
 canvas.addEventListener('pointerdown',e=>{
   if(e.pointerType==='mouse'&&e.button!==0)return;
@@ -266,6 +275,8 @@ canvas.addEventListener('pointerup',e=>{
 
   // Construction is a one-shot action. Return immediately to the normal tap-to-earn state.
   state.buildMode=false;
+  constructionInfoToggle.classList.remove('visible');
+  buildingPanel.classList.remove('visible');
   document.querySelectorAll('[data-building]').forEach(button=>button.classList.remove('active'));
   hint.textContent=def.name+' ساخته شد؛ برای درآمد روی شهر بزن.';
   render();
