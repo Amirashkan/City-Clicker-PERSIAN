@@ -394,3 +394,21 @@ canvas{
 .about-content p:first-child{margin-top:0;color:var(--text)}
 
 .settings-options button[data-sound-toggle]{font-size:9px}
+
+/* Start menu */
+.start-menu{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(145deg,#efe7d8f5,#d8e5d9f2);transition:opacity .22s ease,visibility .22s ease}
+.start-menu.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.start-menu-card{width:min(360px,100%);padding:34px 26px 28px;text-align:center;border:1px solid #c9c0b1;border-radius:22px;background:#f7f1e7f5;box-shadow:0 20px 70px #554a3a25}
+.start-menu-title{font-size:42px;font-weight:800;letter-spacing:-1px;color:#34302a}
+.start-menu-subtitle{margin-top:5px;color:#756c60;font-size:12px}
+.start-menu-actions{display:flex;flex-direction:column;gap:9px;margin-top:30px}
+.start-menu-actions button{width:100%;min-height:46px;border:1px solid #b8ae9e;border-radius:11px;font:inherit;font-size:12px;cursor:pointer;touch-action:manipulation}
+.start-menu-primary{background:#34302a;color:#fff;border-color:#34302a!important}
+.start-menu-secondary{background:transparent;color:#4e463d}
+.start-menu-actions button:active{transform:scale(.985)}
+:root.dark .start-menu{background:linear-gradient(145deg,#202824f7,#171613f7)}
+:root.dark .start-menu-card{background:#25231ff5;border-color:#4a443b}
+:root.dark .start-menu-title{color:#eee9df}
+:root.dark .start-menu-subtitle{color:#aaa296}
+:root.dark .start-menu-secondary{color:#eee9df;border-color:#4a443b}
+:root.dark .start-menu-primary{background:#eee9df;color:#24221e}
