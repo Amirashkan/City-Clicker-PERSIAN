@@ -14,8 +14,7 @@ function syncMenu(){
 continueBtn.addEventListener('click',enterGame);
 newBtn.addEventListener('click',()=>{
   if(hasSave()&&!confirm('بازی فعلی پاک شود و از ابتدا شروع شود؟'))return;
-  localStorage.removeItem('city-clicker-save-v1');
-  localStorage.removeItem('city-clicker-regions');
+  localStorage.setItem('city-clicker-new-game','1');
   sessionStorage.setItem(STARTED_KEY,'1');
   location.reload();
 });
