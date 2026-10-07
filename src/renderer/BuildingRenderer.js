@@ -6,7 +6,7 @@ export function drawBuilding(ctx,iso,b,hover=false){
  const sx=Math.max(.58,Math.min(.88,b.w||.78)),sy=Math.max(.58,Math.min(.88,b.d||.78));
  const hw=tw*sx/2,hh=th*sy/2;
  const baseHeight=b.height!=null?b.height*th:(b.h||34)*(th/27);
- const h=baseHeight+(level-1)*th*.24;
+ const h=baseHeight+(level-1)*th*.32;
  const pal={house:['#bd8158','#a96d4c','#d9a06e'],shop:['#b69a68','#987d53','#d0b37b'],bakery:['#c99462','#a8754e','#e0b37f'],workshop:['#7f8983','#68716c','#9da79f']}[b.type]||['#bd8158','#a96d4c','#d9a06e'];
  ctx.save();
  if(hover){ctx.shadowColor='rgba(40,30,20,.22)';ctx.shadowBlur=7;ctx.shadowOffsetY=2}
@@ -17,8 +17,6 @@ export function drawBuilding(ctx,iso,b,hover=false){
  if(b.type==='house'&&b.antenna)drawAntenna(ctx,p.x+hw*.25,g.top.y-2);
  if(b.type==='workshop')drawWorkshop(ctx,p.x+hw*.15,g.top.y-3,b);
  if(b.type==='bakery'&&b.chimney)drawChimney(ctx,p.x+hw*.25,g.top.y-2);
- if(level>=2)drawUpperModel(ctx,p,tw,th,g,b,pal,level);
- if(level>=3)drawRooftopModel(ctx,p,tw,th,g,b,pal);
  drawLevelBadge(ctx,p.x,g.top.y-10,level);ctx.restore();
 }
 
