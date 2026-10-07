@@ -65,33 +65,51 @@ export function drawGrid(ctx,iso,width,height,hover,mask=null,unlockedMask=null)
   const parallaxY=(iso.originY-baseOriginY)*.10;
   drawLandscape(ctx,canvasW,canvasH,dark,parallaxX,parallaxY);
 
-  // Extend the city into a grounded platform so the playable area does not look like
-  // a floating diamond. The platform follows the map footprint and continues toward
-  // the bottom of the viewport like a physical base.
-  const topLeft=iso.worldToScreen(0,0);
-  const topRight=iso.worldToScreen(width,0);
-  const bottomRight=iso.worldToScreen(width,height);
-  const bottomLeft=iso.worldToScreen(0,height);
-  const platformBottom=canvasH+Math.max(28,canvasH*.06);
-  ctx.beginPath();
-  ctx.moveTo(bottomLeft.x,bottomLeft.y);
-  ctx.lineTo(bottomRight.x,bottomRight.y);
-  ctx.lineTo(Math.min(canvasW,Math.max(bottomRight.x,canvasW*.92)),platformBottom);
-  ctx.lineTo(Math.max(0,Math.min(bottomLeft.x,canvasW*.08)),platformBottom);
-  ctx.closePath();
-  ctx.fillStyle=dark?'#252722':'#a8a78f';
-  ctx.fill();
+  // Extrude the actual map footprint downward. Each exposed lower edge of the
+  // playable mask becomes the top edge of a ground/base face, so the base follows
+  // irregular map shapes instead of becoming a rectangle.
+  const baseFill=dark?'#252722':'#a8a78f';
+  const baseEdge=dark?'#1d1f1b':'#8f907c';
+  const baseBottom=canvasH+Math.max(28,canvasH*.06);
+  for(let y=0;y<height;y++)for(let x=0;x<width;x++){
+    if(mask&&!mask[y]?.[x])continue;
+    const below=mask ? !!mask[y+1]?.[x] : y<height-1;
+    if(below)continue;
 
-  // Narrow front lip gives the base a physical edge without competing with the city.
-  const lip=Math.max(10,canvasH*.018);
-  ctx.beginPath();
-  ctx.moveTo(bottomLeft.x,Math.max(bottomLeft.y,platformBottom-lip));
-  ctx.lineTo(bottomRight.x,Math.max(bottomRight.y,platformBottom-lip));
-  ctx.lineTo(Math.min(canvasW,Math.max(bottomRight.x,canvasW*.92)),platformBottom);
-  ctx.lineTo(Math.max(0,Math.min(bottomLeft.x,canvasW*.08)),platformBottom);
-  ctx.closePath();
-  ctx.fillStyle=dark?'#1d1f1b':'#8f907c';
-  ctx.fill();
+    const p=iso.worldToScreen(x,y);
+    const left={x:p.x-tw/2,y:p.y+th/2};
+    const bottom={x:p.x,y:p.y+th};
+    const right={x:p.x+tw/2,y:p.y+th/2};
+
+    // Left half of the exposed bottom edge.
+    ctx.beginPath();
+    ctx.moveTo(left.x,left.y);
+    ctx.lineTo(bottom.x,bottom.y);
+    ctx.lineTo(bottom.x,baseBottom);
+    ctx.lineTo(left.x,baseBottom);
+    ctx.closePath();
+    ctx.fillStyle=baseFill;
+    ctx.fill();
+
+    // Right half of the exposed bottom edge.
+    ctx.beginPath();
+    ctx.moveTo(bottom.x,bottom.y);
+    ctx.lineTo(right.x,right.y);
+    ctx.lineTo(right.x,baseBottom);
+    ctx.lineTo(bottom.x,baseBottom);
+    ctx.closePath();
+    ctx.fillStyle=baseFill;
+    ctx.fill();
+
+    // Subtle front edge.
+    ctx.strokeStyle=baseEdge;
+    ctx.lineWidth=1;
+    ctx.beginPath();
+    ctx.moveTo(left.x,baseBottom);
+    ctx.lineTo(bottom.x,baseBottom);
+    ctx.lineTo(right.x,baseBottom);
+    ctx.stroke();
+  }
 
   ctx.lineWidth=1;
   for(let y=0;y<height;y++)for(let x=0;x<width;x++){
