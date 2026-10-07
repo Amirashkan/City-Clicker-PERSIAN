@@ -18,11 +18,13 @@ const constructionInfoToggle=document.querySelector('#construction-info-toggle')
 // --- User settings ---------------------------------------------------------
 const SETTINGS_KEY='city-clicker-settings';
 const SAVE_KEY='city-clicker-save-v1';
-const uiSettings={theme:'light',uiSize:'normal'};
+const uiSettings={theme:'light',uiSize:'normal',sounds:true,music:true};
 try{
   const saved=JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}');
   if(saved.theme==='dark'||saved.theme==='light')uiSettings.theme=saved.theme;
   if(['small','normal','large'].includes(saved.uiSize))uiSettings.uiSize=saved.uiSize;
+  if(typeof saved.sounds==='boolean')uiSettings.sounds=saved.sounds;
+  if(typeof saved.music==='boolean')uiSettings.music=saved.music;
 }catch{}
 
 function applySettings(){
@@ -31,6 +33,10 @@ function applySettings(){
   document.documentElement.style.setProperty('--ui-scale',scales[uiSettings.uiSize]);
   document.querySelectorAll('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme===uiSettings.theme));
   document.querySelectorAll('[data-ui-size]').forEach(b=>b.classList.toggle('active',b.dataset.uiSize===uiSettings.uiSize));
+  document.querySelectorAll('[data-sound-toggle]').forEach(b=>b.classList.toggle('active',b.dataset.soundToggle==='sounds' ? uiSettings.sounds : uiSettings.music));
+  document.querySelectorAll('[data-sound-toggle]').forEach(b=>{const on=b.dataset.soundToggle==='sounds'?uiSettings.sounds:uiSettings.music;b.setAttribute('aria-pressed',String(on));b.textContent=(b.dataset.soundToggle==='sounds'?'صداهای بازی: ':'موسیقی: ')+(on?'روشن':'خاموش')});
+  audio.toggleSounds(uiSettings.sounds);
+  audio.toggleMusic(uiSettings.music);
   try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(uiSettings))}catch{}
 }
 const cityStatusEls={
@@ -98,6 +104,13 @@ document.querySelectorAll('[data-theme]').forEach(button=>{
 });
 document.querySelectorAll('[data-ui-size]').forEach(button=>{
   button.addEventListener('click',()=>{uiSettings.uiSize=button.dataset.uiSize;applySettings()});
+});
+document.querySelectorAll('[data-sound-toggle]').forEach(button=>{
+  button.addEventListener('click',()=>{
+    if(button.dataset.soundToggle==='sounds')uiSettings.sounds=!uiSettings.sounds;
+    else uiSettings.music=!uiSettings.music;
+    applySettings();
+  });
 });
 document.querySelector('#reset-game').addEventListener('click',resetGame);
 
