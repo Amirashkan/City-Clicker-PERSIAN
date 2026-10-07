@@ -45,17 +45,16 @@ function drawWindows(c,g,type,count,upper){
 
 function drawUpperModel(c,p,tw,th,g,b,basePal,level){
  const s=level===2?.72:.60;
+ const uh=th*(level===2?.20:.25);
  const upH=th*(level===2?.27:.31);
- // The lower point of an added floor is exactly the roof of the floor below.
- // No arbitrary vertical offset: this keeps the stack watertight at every zoom.
- const ux=level===2?p.x:p.x+tw*.035;
- const uy=g.top.y;
+ const ux=level===2?p.x:p.x+tw*.035, uy=g.top.y-uh*.35;
  const pal=[basePal[0],basePal[1],basePal[2]];
  const u=drawBlock(c,{x:ux,y:uy},tw*s/2,th*s*.28,upH,pal);
  const count=level===2?2:3;
  drawWindows(c,u,b.type,count,false);
  if(b.type==='house'){
-  drawRoofCap(c,u,level===2?tw*.18:tw*.24,level===2?th*.10:th*.13);
+  if(level===2)drawRoofCap(c,u,tw*.18,th*.10);
+  else drawRoofCap(c,u,tw*.24,th*.13);
  }else if(b.type==='shop'){
   drawSign(c,ux,u.top.y+th*.09,'فروش',level===2?'wide':'compact',th*.28);
  }else if(b.type==='bakery'){
@@ -64,6 +63,4 @@ function drawUpperModel(c,p,tw,th,g,b,basePal,level){
  }else if(b.type==='workshop'){
   drawWorkshop(c,ux+tw*.08,u.top.y-2,{vent:true,stack:level>=3});
  }
- return u;
 }
-
