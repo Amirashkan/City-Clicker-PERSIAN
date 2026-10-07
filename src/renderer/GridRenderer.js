@@ -74,41 +74,57 @@ export function drawGrid(ctx,iso,width,height,hover,mask=null,unlockedMask=null)
   for(let y=0;y<height;y++)for(let x=0;x<width;x++){
     if(mask&&!mask[y]?.[x])continue;
     const below=mask ? !!mask[y+1]?.[x] : y<height-1;
-    if(below)continue;
+    const rightOpen=mask ? !mask[y]?.[x+1] : x===width-1;
+    if(below && !rightOpen)continue;
 
     const p=iso.worldToScreen(x,y);
     const left={x:p.x-tw/2,y:p.y+th/2};
     const bottom={x:p.x,y:p.y+th};
     const right={x:p.x+tw/2,y:p.y+th/2};
 
-    // Left half of the exposed bottom edge.
-    ctx.beginPath();
-    ctx.moveTo(left.x,left.y);
-    ctx.lineTo(bottom.x,bottom.y);
-    ctx.lineTo(bottom.x,baseBottom);
-    ctx.lineTo(left.x,baseBottom);
-    ctx.closePath();
-    ctx.fillStyle=baseFill;
-    ctx.fill();
+    // Downward-facing exposed edge.
+    if(!below){
+      ctx.beginPath();
+      ctx.moveTo(left.x,left.y);
+      ctx.lineTo(bottom.x,bottom.y);
+      ctx.lineTo(bottom.x,baseBottom);
+      ctx.lineTo(left.x,baseBottom);
+      ctx.closePath();
+      ctx.fillStyle=baseFill;
+      ctx.fill();
+      ctx.strokeStyle=baseEdge;
+      ctx.lineWidth=1;
+      ctx.stroke();
+    }
 
-    // Right half of the exposed bottom edge.
-    ctx.beginPath();
-    ctx.moveTo(bottom.x,bottom.y);
-    ctx.lineTo(right.x,right.y);
-    ctx.lineTo(right.x,baseBottom);
-    ctx.lineTo(bottom.x,baseBottom);
-    ctx.closePath();
-    ctx.fillStyle=baseFill;
-    ctx.fill();
+    // Right-facing exposed edge. It is extruded separately so stepped/right
+    // boundaries of an irregular map remain visible.
+    if(rightOpen){
+      ctx.beginPath();
+      ctx.moveTo(bottom.x,bottom.y);
+      ctx.lineTo(right.x,right.y);
+      ctx.lineTo(right.x,baseBottom);
+      ctx.lineTo(bottom.x,baseBottom);
+      ctx.closePath();
+      ctx.fillStyle=dark?'#20221e':'#999a83';
+      ctx.fill();
+      ctx.strokeStyle=baseEdge;
+      ctx.lineWidth=1;
+      ctx.stroke();
+    }
 
-    // Subtle front edge.
-    ctx.strokeStyle=baseEdge;
-    ctx.lineWidth=1;
-    ctx.beginPath();
-    ctx.moveTo(left.x,baseBottom);
-    ctx.lineTo(bottom.x,baseBottom);
-    ctx.lineTo(right.x,baseBottom);
-    ctx.stroke();
+    // Small contact shadow under the exposed corner makes each break in the
+    // outline readable without turning the whole base into a heavy shadow.
+    if(!below || rightOpen){
+      ctx.fillStyle=dark?'rgba(0,0,0,.18)':'rgba(45,40,30,.12)';
+      ctx.beginPath();
+      ctx.moveTo(p.x,p.y+th);
+      ctx.lineTo(p.x+tw*.16,p.y+th*.16+th);
+      ctx.lineTo(p.x+tw*.28,p.y+th*.16+th);
+      ctx.lineTo(p.x+tw*.16,p.y+th*.16+th);
+      ctx.closePath();
+      ctx.fill();
+    }
   }
 
   ctx.lineWidth=1;
