@@ -64,6 +64,35 @@ export function drawGrid(ctx,iso,width,height,hover,mask=null,unlockedMask=null)
   const parallaxX=(iso.originX-baseOriginX)*.18;
   const parallaxY=(iso.originY-baseOriginY)*.10;
   drawLandscape(ctx,canvasW,canvasH,dark,parallaxX,parallaxY);
+
+  // Extend the city into a grounded platform so the playable area does not look like
+  // a floating diamond. The platform follows the map footprint and continues toward
+  // the bottom of the viewport like a physical base.
+  const topLeft=iso.worldToScreen(0,0);
+  const topRight=iso.worldToScreen(width,0);
+  const bottomRight=iso.worldToScreen(width,height);
+  const bottomLeft=iso.worldToScreen(0,height);
+  const platformBottom=canvasH+Math.max(28,canvasH*.06);
+  ctx.beginPath();
+  ctx.moveTo(bottomLeft.x,bottomLeft.y);
+  ctx.lineTo(bottomRight.x,bottomRight.y);
+  ctx.lineTo(Math.min(canvasW,Math.max(bottomRight.x,canvasW*.92)),platformBottom);
+  ctx.lineTo(Math.max(0,Math.min(bottomLeft.x,canvasW*.08)),platformBottom);
+  ctx.closePath();
+  ctx.fillStyle=dark?'#252722':'#a8a78f';
+  ctx.fill();
+
+  // Narrow front lip gives the base a physical edge without competing with the city.
+  const lip=Math.max(10,canvasH*.018);
+  ctx.beginPath();
+  ctx.moveTo(bottomLeft.x,Math.max(bottomLeft.y,platformBottom-lip));
+  ctx.lineTo(bottomRight.x,Math.max(bottomRight.y,platformBottom-lip));
+  ctx.lineTo(Math.min(canvasW,Math.max(bottomRight.x,canvasW*.92)),platformBottom);
+  ctx.lineTo(Math.max(0,Math.min(bottomLeft.x,canvasW*.08)),platformBottom);
+  ctx.closePath();
+  ctx.fillStyle=dark?'#1d1f1b':'#8f907c';
+  ctx.fill();
+
   ctx.lineWidth=1;
   for(let y=0;y<height;y++)for(let x=0;x<width;x++){
     if(mask&&!mask[y]?.[x])continue;
