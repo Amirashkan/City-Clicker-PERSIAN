@@ -392,3 +392,5 @@ canvas{
 .info-content b{font-size:12px}
 .info-content p,.about-content p{margin:4px 0 0;font-size:10px;line-height:1.9;color:var(--muted)}
 .about-content p:first-child{margin-top:0;color:var(--text)}
+
+.settings-options button[data-sound-toggle]{font-size:9px}
