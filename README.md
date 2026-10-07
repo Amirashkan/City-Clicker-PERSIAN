@@ -1,6 +1,6 @@
-# City Clicker — Persian
+# بومک
 
-An isometric procedural city clicker prototype.
+Persian isometric city clicker prototype.
 
 ## Current direction
 
