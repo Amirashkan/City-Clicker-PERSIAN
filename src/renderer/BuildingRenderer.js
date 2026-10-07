@@ -45,9 +45,10 @@ function drawWindows(c,g,type,count,upper){
 
 function drawUpperModel(c,p,tw,th,g,b,basePal,level){
  const s=level===2?.72:.60;
- const uh=th*(level===2?.20:.25);
  const upH=th*(level===2?.27:.31);
- const ux=level===2?p.x:p.x+tw*.035, uy=g.top.y-uh*.35;
+ // Keep the added floor exactly attached to the roof below; no floating offset.
+ const ux=level===2?p.x:p.x+tw*.035;
+ const uy=g.top.y;
  const pal=[basePal[0],basePal[1],basePal[2]];
  const u=drawBlock(c,{x:ux,y:uy},tw*s/2,th*s*.28,upH,pal);
  const count=level===2?2:3;
