@@ -266,7 +266,7 @@ function buildingAt(screenX,screenY){
   // another tile from selecting the neighboring house underneath it.
   for(const b of ordered){
     const p=iso.worldToScreen(b.x+.5,b.y+.5);
-    const tw=iso.tileWidth,th=iso.tileHeight,h=(b.h||34)+(Math.max(1,b.level||1)-1)*7;
+    const tw=iso.tileWidth,th=iso.tileHeight,h=(b.height!=null?b.height*th:(b.h||34)*(th/27))+(Math.max(1,b.level||1)-1)*th*.24;
     const halfW=(b.w||.78)*tw*.72;
     const halfH=(b.d||.78)*th*.85;
     if(b.type==='park'){
