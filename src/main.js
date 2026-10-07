@@ -5,6 +5,7 @@ import{drawBuilding}from'./renderer/BuildingRenderer.js';
 import{drawGrid}from'./renderer/GridRenderer.js';
 import{drawAmbientLife}from'./renderer/AmbientLife.js';
 import{generateMapMask}from'./map/MapGenerator.js';
+import{audio}from'./core/AudioManager.js';
 
 const canvas=document.querySelector('#city'),ctx=canvas.getContext('2d');
 const moneyEl=document.querySelector('#money'),incomeEl=document.querySelector('#income'),clickEl=document.querySelector('#click-value');
@@ -82,7 +83,7 @@ document.querySelector('#city-status-close').addEventListener('click',closeCityS
 cityStatusPanel.addEventListener('click',e=>{if(e.target===cityStatusPanel)closeCityStatus()});
 
 const settingsPanel=document.querySelector('#settings-panel');
-document.querySelector('#settings-button').addEventListener('click',()=>{
+document.querySelector('#settings-button').addEventListener('click',()=>{audio.play('ui-open');
   settingsPanel.classList.add('visible');
   settingsPanel.setAttribute('aria-hidden','false');
 });
@@ -116,6 +117,7 @@ setupInfoPanel('#game-guide-button','#game-guide-panel','#game-guide-close');
 setupInfoPanel('#about-game-button','#about-game-panel','#about-game-close');
 
 applySettings();
+audio.init();
 // ---------------------------------------------------------------------------
 
 const GRID=15;
@@ -151,7 +153,7 @@ function isUnlockedTile(x,y){if(baseMapMask[y]?.[x])return true;const region=reg
 function getUnlockedMask(){return mapMask.map((row,y)=>row.map((cell,x)=>cell&&isUnlockedTile(x,y)))}
 function showRegionPurchase(region){
  buildingPanel.innerHTML='<button class="building-close" type="button" aria-label="بستن">×</button><div class="building-panel-title">'+region.name+'</div><div class="building-panel-meta">این منطقه هنوز خریداری نشده است.</div><div class="building-panel-grid"><span>هزینه خرید</span><b>'+region.cost.toLocaleString('fa-IR')+' تومان</b><span class="building-effect">بعد از خرید، خانه‌های این منطقه برای ساخت‌وساز باز می‌شوند.</span></div><button class="upgrade-building" type="button" '+(state.money<region.cost?'disabled':'')+'>خرید منطقه · '+region.cost.toLocaleString('fa-IR')+' تومان</button>';
- buildingPanel.classList.add('visible');buildingPanel.querySelector('.building-close').onclick=()=>buildingPanel.classList.remove('visible');buildingPanel.querySelector('.upgrade-building').onclick=()=>{if(state.money>=region.cost){state.money-=region.cost;purchasedRegions.push(region.id);saveRegions();saveGame();buildingPanel.classList.remove('visible');hint.textContent=region.name+' خریداری شد.';render()}};
+ buildingPanel.classList.add('visible');buildingPanel.querySelector('.building-close').onclick=()=>buildingPanel.classList.remove('visible');buildingPanel.querySelector('.upgrade-building').onclick=()=>{if(state.money>=region.cost){state.money-=region.cost;purchasedRegions.push(region.id);saveRegions();saveGame();audio.play('unlock');buildingPanel.classList.remove('visible');hint.textContent=region.name+' خریداری شد.;render()}};
 }
 
 const state={
@@ -315,7 +317,7 @@ function showBuildingStatus(b){
   buildingPanel.classList.add('visible');buildingPanel.querySelector('.effect-radius-toggle').onclick=()=>{state.effectRadiusVisible=!state.effectRadiusVisible;showBuildingStatus(b);render()};
   buildingPanel.querySelector('.building-close').onclick=()=>buildingPanel.classList.remove('visible');
   const downgradeButton=buildingPanel.querySelector('.downgrade-building');
-  if(downgradeButton)downgradeButton.onclick=()=>{const freshCost=getUpgradeCost(b.type,(b.level||1)-1);if(!freshCost||b.level<=1)return;state.money+=Math.floor(freshCost*.5);b.level=Math.max(1,b.level-1);refreshEconomy();saveGame();hint.textContent=def.name+' به سطح '+b.level+' برگشت.';showBuildingStatus(b);render()};
+  if(downgradeButton)downgradeButton.onclick=()=>{const freshCost=getUpgradeCost(b.type,(b.level||1)-1);if(!freshCost||b.level<=1)return;state.money+=Math.floor(freshCost*.5);b.level=Math.max(1,b.level-1);audio.play('upgrade');refreshEconomy();saveGame();hint.textContent=def.name+' به سطح '+b.level+' برگشت.';showBuildingStatus(b);render()};
   const upgradeButton=buildingPanel.querySelector('.upgrade-building');
   if(upgradeButton){
     upgradeButton.onclick=()=>{
@@ -323,6 +325,7 @@ function showBuildingStatus(b){
       if(!freshCost||state.money<freshCost)return;
       state.money-=freshCost;
       b.level=Math.min(3,(b.level||1)+1);
+      audio.play('upgrade');
       refreshEconomy();
       saveGame();
       hint.textContent=def.name+' به سطح '+b.level+' رسید.';
@@ -332,6 +335,7 @@ function showBuildingStatus(b){
   }
 }
 function manualClick(x,y){
+  audio.play('click');
   state.money+=state.economy.clickValue;
   saveGame();
   showClickFeedback(x,y);
@@ -396,7 +400,7 @@ canvas.addEventListener('pointerup',e=>{
     if(state.demolishMode){
       const level=clickedBuilding.level||1;let invested=BUILDINGS[clickedBuilding.type].cost;
       for(let l=1;l<level;l++)invested+=getUpgradeCost(clickedBuilding.type,l)||0;
-      const refund=Math.floor(invested*.75);state.money+=refund;state.buildings=state.buildings.filter(item=>item!==clickedBuilding);refreshEconomy();saveGame();buildingPanel.classList.remove('visible');hint.textContent=BUILDINGS[clickedBuilding.type].name+' حذف شد؛ '+refund.toLocaleString('fa-IR')+' تومان بازگشت.';render();
+      const refund=Math.floor(invested*.75);state.money+=refund;state.buildings=state.buildings.filter(item=>item!==clickedBuilding);audio.play('money');refreshEconomy();saveGame();buildingPanel.classList.remove('visible');hint.textContent=BUILDINGS[clickedBuilding.type].name+' حذف شد؛ '+refund.toLocaleString('fa-IR')+' تومان بازگشت.';render();
     }else showBuildingStatus(clickedBuilding);
     return;
   }
@@ -409,10 +413,12 @@ canvas.addEventListener('pointerup',e=>{
 
   const def=BUILDINGS[state.selected];
   if(!validTile(tile.x,tile.y)){
+    audio.play('error');
     hint.textContent='این خانه قابل ساخت نیست.';
     return;
   }
   if(state.money<def.cost){
+    audio.play('error');
     hint.textContent='پول کافی نیست.';
     return;
   }
@@ -420,6 +426,7 @@ canvas.addEventListener('pointerup',e=>{
   state.money-=def.cost;
   const building=createBuilding(state.selected,{x:tile.x,y:tile.y});
   state.buildings.push(building);
+  audio.play('buy');
   refreshEconomy();
   saveGame();
 
