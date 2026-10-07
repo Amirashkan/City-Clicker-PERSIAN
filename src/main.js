@@ -1,6 +1,6 @@
 import{IsoProjection}from'./map/IsoProjection.js';
 import{BUILDINGS,createBuilding,getUpgradeCost}from'./buildings/registry.js';
-import{calculateEconomy,evaluateBuilding,getLevelStats,getAgeStats}from'./core/Rules.js';
+import{calculateEconomy,evaluateBuilding,getLevelStats}from'./core/Rules.js';
 import{drawBuilding}from'./renderer/BuildingRenderer.js';
 import{drawGrid}from'./renderer/GridRenderer.js';
 import{drawAmbientLife}from'./renderer/AmbientLife.js';
@@ -310,7 +310,6 @@ function showBuildingStatus(b){
   const result=evaluateBuilding(b,state.buildings);
   const level=b.level||1;
   const stats=getLevelStats(level);
-  const age=getAgeStats(b);
   const effectLines=[...result.received,...result.provided];
   const contribution=[];
   if(result.autoClick)contribution.push('درآمد این ساختمان: +'+result.autoClick.toLocaleString('fa-IR',{maximumFractionDigits:2})+' در ثانیه');
@@ -330,7 +329,7 @@ function showBuildingStatus(b){
 
   buildingPanel.innerHTML='<button class="building-close" type="button" aria-label="بستن">×</button>'+
     '<div class="building-panel-title">'+def.name+'</div>'+
-    '<div class="building-panel-meta">سطح ارتقا '+level+' · سطح عمر '+age.level+' از ۵ · شعاع اثر '+stats.radius+' خانه</div>'+
+    '<div class="building-panel-meta">سطح ارتقا '+level+' · شعاع اثر '+stats.radius+' خانه</div>'+
     '<div class="building-panel-grid"><span>هزینه ساخت</span><b>'+def.cost.toLocaleString('fa-IR')+' تومان</b>'+
     contribution.map(e=>'<span class="building-effect">'+e+'</span>').join('')+
     effectLines.map(e=>'<span class="building-effect">'+e+'</span>').join('')+
