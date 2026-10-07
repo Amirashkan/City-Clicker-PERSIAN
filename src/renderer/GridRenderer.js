@@ -1,4 +1,9 @@
-function drawLandscape(ctx,w,h,dark=false){
+function drawLandscape(ctx,w,h,dark=false,offsetX=0,offsetY=0){
+  const margin=Math.max(80,Math.abs(offsetX)+40,Math.abs(offsetY)+40);
+  const bw=w+margin*2,bh=h+margin*2;
+  ctx.save();
+  ctx.translate(offsetX-margin,offsetY-margin);
+  w=bw;h=bh;
   // Soft illustrated backdrop: sky, distant mountains, plain, and a low city silhouette.
   const sky=ctx.createLinearGradient(0,0,0,h);
   if(dark){
@@ -44,13 +49,21 @@ function drawLandscape(ctx,w,h,dark=false){
   }
   ctx.fillStyle=dark?'#303631':'#7d847b';
   ctx.fillRect(0,base,w,Math.max(2,h*.008));
+  ctx.restore();
 }
 
 export function drawGrid(ctx,iso,width,height,hover,mask=null,unlockedMask=null){
   const tw=iso.tileWidth,th=iso.tileHeight;
-  const canvasW=ctx.canvas.width/(devicePixelRatio||1),canvasH=ctx.canvas.height/(devicePixelRatio||1);
+  const rect=ctx.canvas.getBoundingClientRect();
+  const canvasW=rect.width,canvasH=rect.height;
   const dark=document.documentElement.classList.contains('dark');
-  drawLandscape(ctx,canvasW,canvasH,dark);
+  // Give the landscape a subtle parallax response to map panning: the backdrop follows
+  // the map, but much more slowly, so it feels like a distant landscape rather than UI.
+  const baseOriginX=canvasW/2;
+  const baseOriginY=Math.max(55,canvasH*.20);
+  const parallaxX=(iso.originX-baseOriginX)*.18;
+  const parallaxY=(iso.originY-baseOriginY)*.10;
+  drawLandscape(ctx,canvasW,canvasH,dark,parallaxX,parallaxY);
   ctx.lineWidth=1;
   for(let y=0;y<height;y++)for(let x=0;x<width;x++){
     if(mask&&!mask[y]?.[x])continue;
