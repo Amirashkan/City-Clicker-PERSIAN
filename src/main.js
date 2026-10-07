@@ -180,7 +180,17 @@ let iso;
 function saveGame(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({money:state.money,buildings:state.buildings,purchasedRegions,savedAt:Date.now()}))}catch{}}
 function loadGame(){try{const saved=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');if(!saved)return;if(Number.isFinite(saved.money))state.money=Math.max(0,saved.money);if(Array.isArray(saved.buildings)){state.buildings=saved.buildings.filter(b=>b&&BUILDINGS[b.type]&&Number.isInteger(b.x)&&Number.isInteger(b.y));state.buildings.forEach(b=>{b.level=Math.max(1,Math.min(3,Number(b.level)||1))})}if(Array.isArray(saved.purchasedRegions)){purchasedRegions=[...new Set(saved.purchasedRegions.filter(id=>REGION_DEFS.some(r=>r.id===id)))];saveRegions()}}catch{}}
 function resetGame(){if(!confirm('همه پیشرفت شهر، ساختمان‌ها و مناطق خریداری‌شده پاک شود؟'))return;localStorage.removeItem(SAVE_KEY);localStorage.removeItem(REGION_KEY);state.money=500;state.buildings=[];state.buildMode=false;state.selected='house';state.effectRadiusBuilding=null;state.effectRadiusVisible=false;purchasedRegions=[];refreshEconomy();constructionInfoToggle.classList.remove('visible');buildingPanel.classList.remove('visible');document.querySelectorAll('[data-building]').forEach(b=>b.classList.remove('active'));hint.textContent='شهر از نو شروع شد.';closeSettings();render();saveGame()}
-loadGame();
+const NEW_GAME_KEY='city-clicker-new-game';
+if(localStorage.getItem(NEW_GAME_KEY)==='1'){
+  localStorage.removeItem(NEW_GAME_KEY);
+  localStorage.removeItem(SAVE_KEY);
+  localStorage.removeItem(REGION_KEY);
+  state.money=500;
+  state.buildings=[];
+  purchasedRegions=[];
+}else{
+  loadGame();
+}
 
 function resize(){
   const dpr=Math.min(devicePixelRatio||1,2),r=canvas.getBoundingClientRect();
