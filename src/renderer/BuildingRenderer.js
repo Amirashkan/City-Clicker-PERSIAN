@@ -3,7 +3,7 @@ export function drawBuilding(ctx,iso,b,hover=false){
  if(b.type==='farm')return drawFarm(ctx,iso,b,hover);
  const p=iso.worldToScreen(b.x+.5,b.y+.5),tw=iso.tileWidth,th=iso.tileHeight;
  const sx=Math.max(.58,Math.min(.88,b.w||.78)),sy=Math.max(.58,Math.min(.88,b.d||.78));
- const hw=tw*sx/2,hh=th*sy/2,h=(b.h||34)+(Math.max(1,b.level||1)-1)*7;
+ const hw=tw*sx/2,hh=th*sy/2; const baseHeight=b.height!=null?b.height*th:(b.h||34)*(th/27); const h=baseHeight+(Math.max(1,b.level||1)-1)*th*.24;
  const baseTop={x:p.x,y:p.y-hh},baseR={x:p.x+hw,y:p.y},baseB={x:p.x,y:p.y+hh},baseL={x:p.x-hw,y:p.y};
  const topY=baseTop.y-h;
  const top={x:p.x,y:topY},topR={x:p.x+hw,y:topY+hh},topB={x:p.x,y:topY+hh*2},topL={x:p.x-hw,y:topY+hh};
